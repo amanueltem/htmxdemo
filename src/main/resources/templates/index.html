@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>HTMX + Spring Boot</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body hx-boost="true">
+
+<div class="container">
+    <h1>My Tasks</h1>
+
+    <form hx-post="/add-task"
+          hx-target="#task-list-container"
+          hx-on::after-request="this.reset()">
+        <input type="text" name="taskName" placeholder="What needs to be done?" required>
+        <button type="submit">Add Task</button>
+    </form>
+
+    <div id="task-list-container">
+        <ul id="task-list" th:fragment="task-list">
+            <li th:each="task, iter : ${tasks}" th:id="'task-' + ${iter.index}">
+                <span th:text="${task}">Task Name</span>
+                <button class="delete-btn"
+                        th:hx-delete="'/delete-task/' + ${iter.index}"
+                        th:hx-target="'#task-' + ${iter.index}"
+                        hx-swap="outerHTML">
+                    Delete
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

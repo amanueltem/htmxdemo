@@ -34,27 +34,11 @@ public class SecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
-                )
-
-                // Remember-me support (optional)
-                .rememberMe(remember -> remember
-                        .key("uniqueAndSecretKey12345")            // secret key for tokens
-                        .tokenValiditySeconds(7 * 24 * 60 * 60)    // 7 days
-                        .tokenRepository(new InMemoryTokenRepositoryImpl()) // simple in-memory
-                )
-
-                // CSRF configuration
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/h2-console/**") // ignore H2 console if used
-                )
-
-                // Headers
-                .headers(headers -> headers
-                        .frameOptions(frame -> frame.sameOrigin()) // allow H2 console
                 );
 
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

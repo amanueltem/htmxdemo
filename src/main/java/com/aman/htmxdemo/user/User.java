@@ -2,6 +2,7 @@ package com.aman.htmxdemo.user;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.CreatedDate;
@@ -107,5 +108,6 @@ record RegisterRequest(
         @NotBlank String fullName,
         @Email String email,
         String phoneNumber,
+        @Size(min = 8,message = "minimum password is 8 characters.")
         @NotBlank String password
 ) {}

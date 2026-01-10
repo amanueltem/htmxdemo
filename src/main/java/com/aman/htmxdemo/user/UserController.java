@@ -2,6 +2,8 @@ package com.aman.htmxdemo.user;
 
 
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 @Controller
@@ -29,7 +32,8 @@ public class UserController {
 
 
     @GetMapping("/register")
-    public String registerPage() {
+    public String registerPage(Model model) {
+        model.addAttribute("registerRequest", new RegisterRequest(null,null,null,null)); // Must match th:object
         return "auth/register";
     }
 
@@ -38,28 +42,26 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public String register(
-            @Valid RegisterRequest request,
-            BindingResult result,
-            Model model
-    ) {
+    public String register(@Valid @ModelAttribute("registerRequest") RegisterRequest request,
+                           BindingResult result,
+                           HttpServletResponse response,
+                           HttpServletRequest httpRequest) {
+
         if (result.hasErrors()) {
-            model.addAttribute("message", "Invalid input");
-            return "fragments/alert-error";
+            // If it's an HTMX request, return only the form fragment
+            if (httpRequest.getHeader("HX-Request") != null) {
+                return "auth/register :: registrationForm";
+            }
+            // Fallback for standard submission
+            return "auth/register";
         }
 
-        try {
-            userService.register(request);
-            model.addAttribute("message", "Registration successful. You can now log in.");
-            return "fragments/alert-success";
-        } catch (DataIntegrityViolationException ex) {
-            // Most likely duplicate email
-            model.addAttribute("message", "Email already exists. Please use a different email.");
-            return "fragments/alert-error";
-        } catch (IllegalArgumentException ex) {
-            model.addAttribute("message", ex.getMessage());
-            return "fragments/alert-error";
-        }
+        userService.register(request);
+
+        // Full page redirect for success
+        response.setHeader("HX-Redirect", "/login?success=true");
+        return null;
     }
+
 
 }

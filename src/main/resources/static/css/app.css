@@ -1,29 +1,3 @@
-## Goals
-
-* **Professional & responsive** login and registration pages
-* **Highly reusable CSS** (utility + components)
-* **Minimal JavaScript** (HTMX only)
-* Works cleanly with **Spring Security + Thymeleaf**
-
----
-
-## Folder Structure
-
-```
-src/main/resources/
- ├─ static/css/app.css
- └─ templates/auth/
-     ├─ login.html
-     └─ register.html
-```
-
----
-
-## 1) Reusable CSS (utility-first + components)
-
-**`static/css/app.css`**
-
-```css
 /* =========================
    RESET + BASE
 ========================= */
@@ -113,6 +87,7 @@ input:focus {
   border: none;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
 .btn-primary {
@@ -128,33 +103,80 @@ input:focus {
   background: transparent;
   color: var(--primary);
   text-decoration: none;
+  font-size: 0.9rem;
 }
 
 /* =========================
-   ALERTS
+   TOAST NOTIFICATIONS
 ========================= */
-.alert {
-  padding: .75rem 1rem;
-  border-radius: 10px;
-  font-size: .9rem;
+.toast-wrapper {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
 }
 
-.alert-error {
-  background: #fee2e2;
-  color: #7f1d1d;
+.toast-content {
+  display: flex;
+  align-items: center;
+  min-width: 320px;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius);
+  color: #ffffff;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.3s ease-out;
 }
 
-.alert-success {
-  background: #dcfce7;
-  color: #14532d;
+.bg-danger { background-color: var(--danger); }
+.bg-success { background-color: #10b981; }
+.bg-info { background-color: var(--primary); }
+
+.btn-close-white {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-left: auto;
+  line-height: 1;
+  padding-left: 1rem;
+  opacity: 0.8;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
+.btn-close-white:hover { opacity: 1; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 @media (max-width: 480px) {
-  .card {
-    padding: 1.5rem;
-  }
+  .card { padding: 1.5rem; }
+  .toast-wrapper { left: 20px; right: 20px; top: 10px; }
 }
 
+
+/* Validation Styles */
+.text-danger {
+  color: var(--danger);
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.input-error {
+  border-color: var(--danger) !important;
+  background-color: #fff1f2;
+}
+
+/* Optional: Loading Indicator */
+.htmx-indicator {
+  display: none;
+}
+.htmx-request .htmx-indicator {
+  display: inline-block;
+}
+.htmx-request.btn {
+  opacity: 0.7;
+  pointer-events: none;
+}

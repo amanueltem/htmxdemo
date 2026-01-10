@@ -1,6 +1,7 @@
 package com.aman.htmxdemo.security;
 
 
+import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,12 +20,16 @@ public class SecurityConfig {
         http
                 // Authorize requests
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/public/**", "/login", "/css/**").permitAll()
+                        .requestMatchers("/login","/register").permitAll()
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .anyRequest().authenticated()
                 )
 
                 // Form login configuration
                 .formLogin(form -> form
+                        .loginPage("/login")          // 👈 MUST match controller
+                        .loginProcessingUrl("/login") // POST handled by Spring Security
+                        .failureUrl("/login?error")
                         .defaultSuccessUrl("/", true)
                         .permitAll()
                 )

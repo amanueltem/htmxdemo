@@ -1,0 +1,160 @@
+## Goals
+
+* **Professional & responsive** login and registration pages
+* **Highly reusable CSS** (utility + components)
+* **Minimal JavaScript** (HTMX only)
+* Works cleanly with **Spring Security + Thymeleaf**
+
+---
+
+## Folder Structure
+
+```
+src/main/resources/
+ ├─ static/css/app.css
+ └─ templates/auth/
+     ├─ login.html
+     └─ register.html
+```
+
+---
+
+## 1) Reusable CSS (utility-first + components)
+
+**`static/css/app.css`**
+
+```css
+/* =========================
+   RESET + BASE
+========================= */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: 16px; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: #0f172a;
+}
+
+/* =========================
+   DESIGN TOKENS
+========================= */
+:root {
+  --bg-card: #ffffff;
+  --bg-muted: #f8fafc;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --danger: #dc2626;
+  --border: #e5e7eb;
+  --text-muted: #6b7280;
+  --radius: 14px;
+  --shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+
+/* =========================
+   LAYOUT
+========================= */
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2rem;
+}
+
+.stack > * + * { margin-top: 1rem; }
+.text-center { text-align: center; }
+.text-muted { color: var(--text-muted); }
+
+/* =========================
+   FORM ELEMENTS
+========================= */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+label {
+  font-size: .85rem;
+  font-weight: 600;
+}
+
+input {
+  padding: .75rem .9rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-size: .95rem;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* =========================
+   BUTTONS
+========================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .75rem 1rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn-link {
+  background: transparent;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+/* =========================
+   ALERTS
+========================= */
+.alert {
+  padding: .75rem 1rem;
+  border-radius: 10px;
+  font-size: .9rem;
+}
+
+.alert-error {
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+
+.alert-success {
+  background: #dcfce7;
+  color: #14532d;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 480px) {
+  .card {
+    padding: 1.5rem;
+  }
+}
+

@@ -1,5 +1,7 @@
 package com.aman.htmxdemo.user;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.CreatedDate;
@@ -100,3 +102,10 @@ public class User implements UserDetails, Principal {
         return email;
     }
 }
+
+record RegisterRequest(
+        @NotBlank String fullName,
+        @Email String email,
+        String phoneNumber,
+        @NotBlank String password
+) {}

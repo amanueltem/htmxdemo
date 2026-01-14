@@ -13,10 +13,20 @@
 
 <div class="htmx-indicator" id="loading-bar"></div>
 
+<div class="sidebar-overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<header class="mobile-header">
+    <button class="menu-toggle" onclick="toggleMenu()">
+        ☰
+    </button>
+    <span class="logo">FinanceApp</span>
+    <div style="width: 40px;"></div> </header>
+
 <div class="app-layout">
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <a href="/" class="logo">FinanceApp</a>
+            <button class="close-menu" onclick="toggleMenu()">&times;</button>
         </div>
 
         <nav class="nav-links">
@@ -26,7 +36,8 @@
                             hx-get="/expenses"
                             hx-target="#main-content"
                             hx-push-url="true"
-                            hx-indicator="#loading-bar">
+                            hx-indicator="#loading-bar"
+                            onclick="closeMenuOnSelect()">
                         💸 Expenses
                     </button>
                 </li>
@@ -35,7 +46,8 @@
                             hx-get="/deposits"
                             hx-target="#main-content"
                             hx-push-url="true"
-                            hx-indicator="#loading-bar">
+                            hx-indicator="#loading-bar"
+                            onclick="closeMenuOnSelect()">
                         💰 Deposits
                     </button>
                 </li>
@@ -44,9 +56,8 @@
 
         <div class="sidebar-footer">
             <p class="user-name" th:text="${#authentication.name}">User</p>
-
             <form th:action="@{/logout}" method="post">
-                <button type="submit" class="logout-link" style="background:none; border:none; padding:0; font:inherit;">
+                <button type="submit" class="logout-link" style="background:none; border:none; padding:0; font:inherit; cursor:pointer;">
                     Logout
                 </button>
             </form>
@@ -62,29 +73,29 @@
 </div>
 
 <script th:inline="javascript">
-    // 1. Handle CSRF for all HTMX requests
+    // --- Mobile Menu Logic ---
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('active');
+    }
+
+    function closeMenuOnSelect() {
+        if (window.innerWidth <= 768) {
+            toggleMenu();
+        }
+    }
+
+    // --- HTMX Logic ---
     document.body.addEventListener('htmx:configRequest', (event) => {
         event.detail.headers['X-CSRF-TOKEN'] = /*[[${_csrf.token}]]*/ '';
     });
 
-    // 2. Handle "Active" class toggling for Sidebar Buttons
     document.body.addEventListener('htmx:afterOnLoad', function(evt) {
-        // Only run this if the clicked element was a nav-item
         if (evt.detail.elt.classList.contains('nav-item')) {
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             evt.detail.elt.classList.add('active');
         }
     });
-
-    // 3. Optional: Sync active state if user hits browser 'Back' button
-    window.addEventListener('popstate', function() {
-        if (window.location.pathname.includes('expenses')) {
-            htmx.ajax('GET', '/expenses', '#main-content');
-        } else if (window.location.pathname.includes('deposits')) {
-            htmx.ajax('GET', '/deposits', '#main-content');
-        }
-    });
 </script>
-
 </body>
 </html>

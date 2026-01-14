@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" th:href="@{/css/app.css}" />
 </head>
@@ -55,11 +57,6 @@
 </div>
 
 <script>
-    /**
-     * This script removes ?error, ?success, etc. from the address bar
-     * without refreshing the page. This prevents the toasts from
-     * reappearing if the user hits the Refresh button (F5).
-     */
     if (window.history.replaceState) {
         const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
         window.history.replaceState({path: cleanUrl}, '', cleanUrl);

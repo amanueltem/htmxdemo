@@ -44,7 +44,12 @@
 
         <div class="sidebar-footer">
             <p class="user-name" th:text="${#authentication.name}">User</p>
-            <a th:href="@{/logout}" class="logout-link">Logout</a>
+
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="logout-link" style="background:none; border:none; padding:0; font:inherit;">
+                    Logout
+                </button>
+            </form>
         </div>
     </aside>
 

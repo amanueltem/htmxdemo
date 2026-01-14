@@ -1,4 +1,6 @@
 package com.aman.htmxdemo.common;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +19,8 @@ import java.time.LocalDate;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
+@MappedSuperclass
+@EntityListeners(org.springframework.data.jpa.domain.support.AuditingEntityListener.class)
 public abstract class BaseEntity {
     private  String entityStatus=EntityStatus.UNAUTHORIZED.name();
     private String editRequestRemark;

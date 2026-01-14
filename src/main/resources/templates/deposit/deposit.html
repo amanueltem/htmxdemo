@@ -22,16 +22,16 @@
             </thead>
             <tbody>
             <tr th:each="deposit : ${deposits.content}">
-                <td th:text="${deposit.date}"></td>
-                <td th:text="${#numbers.formatDecimal(deposit.amount, 1, 2)}"></td>
-                <td>
+                <td data-label="Date" th:text="${deposit.date}"></td>
+                <td data-label="Amount" th:text="${#numbers.formatDecimal(deposit.amount, 1, 2)}"></td>
+                <td data-label="Status">
                     <span class="status-badge"
                           th:classappend="${deposit.entityStatus == 'AUTHORIZED' ? 'status-success' : 'status-warning'}"
                           th:text="${deposit.entityStatus}">
                     </span>
                 </td>
-                <td th:text="${deposit.inputter}"></td>
-                <td>
+                <td data-label="Inputter" th:text="${deposit.inputter}"></td>
+                <td data-label="Actions">
                     <div class="action-group">
                         <button th:if="${deposit.entityStatus == 'UNAUTHORIZED'}"
                                 sec:authorize="hasRole('INPUTTER')"

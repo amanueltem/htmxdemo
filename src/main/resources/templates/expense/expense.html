@@ -23,16 +23,16 @@
             </thead>
             <tbody>
             <tr th:each="expense : ${expenses.content}">
-                <td th:text="${expense.date}"></td>
-                <td th:text="${expense.timeSpan}"></td>
-                <td th:text="${#numbers.formatDecimal(expense.amount, 1, 2)}"></td>
-                <td>
-                        <span class="status-badge"
-                              th:classappend="${expense.entityStatus == 'AUTHORIZED' ? 'status-success' : 'status-warning'}"
-                              th:text="${expense.entityStatus}"></span>
+                <td data-label="Date" th:text="${expense.date}"></td>
+                <td data-label="Time" th:text="${expense.timeSpan}"></td>
+                <td data-label="Amount" th:text="${#numbers.formatDecimal(expense.amount, 1, 2)}"></td>
+                <td data-label="Status">
+        <span class="status-badge"
+              th:classappend="${expense.entityStatus == 'AUTHORIZED' ? 'status-success' : 'status-warning'}"
+              th:text="${expense.entityStatus}"></span>
                 </td>
-                <td th:text="${expense.inputter}"></td>
-                <td>
+                <td data-label="Inputter" th:text="${expense.inputter}"></td>
+                <td data-label="Actions">
                     <div class="action-group" style="display: flex; gap: 5px;">
                         <button th:if="${expense.entityStatus != 'AUTHORIZED' and (currentUser != null and expense.inputter == currentUser.email)}"
                                 sec:authorize="hasRole('INPUTTER')"

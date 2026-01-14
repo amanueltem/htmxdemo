@@ -20,13 +20,19 @@
         ☰
     </button>
     <span class="logo">FinanceApp</span>
-    <div style="width: 40px;"></div> </header>
+    <div style="width: 40px;"></div>
+</header>
 
 <div class="app-layout">
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <a href="/" class="logo">FinanceApp</a>
             <button class="close-menu" onclick="toggleMenu()">&times;</button>
+        </div>
+
+        <div class="user-info">
+            <span class="user-avatar">👤</span>
+            <p class="user-name" th:text="${#authentication.name}">User</p>
         </div>
 
         <nav class="nav-links">
@@ -55,10 +61,9 @@
         </nav>
 
         <div class="sidebar-footer">
-            <p class="user-name" th:text="${#authentication.name}">User</p>
             <form th:action="@{/logout}" method="post">
-                <button type="submit" class="logout-link" style="background:none; border:none; padding:0; font:inherit; cursor:pointer;">
-                    Logout
+                <button type="submit" class="logout-btn">
+                    <span>🚪</span> Logout
                 </button>
             </form>
         </div>
@@ -73,7 +78,6 @@
 </div>
 
 <script th:inline="javascript">
-    // --- Mobile Menu Logic ---
     function toggleMenu() {
         document.getElementById('sidebar').classList.toggle('open');
         document.getElementById('overlay').classList.toggle('active');
@@ -85,7 +89,6 @@
         }
     }
 
-    // --- HTMX Logic ---
     document.body.addEventListener('htmx:configRequest', (event) => {
         event.detail.headers['X-CSRF-TOKEN'] = /*[[${_csrf.token}]]*/ '';
     });

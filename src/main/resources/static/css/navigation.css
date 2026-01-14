@@ -4,6 +4,7 @@
     --primary: #2563eb;
     --border: #e2e8f0;
     --text-muted: #64748b;
+    --danger: #ef4444;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -17,7 +18,7 @@ body {
 /* Layout Container */
 .app-layout { display: flex; min-height: 100vh; }
 
-/* Sidebar (Desktop) */
+/* Sidebar */
 .sidebar {
     width: 260px;
     background: var(--sidebar-bg);
@@ -29,10 +30,12 @@ body {
     height: 100vh;
     z-index: 1000;
     transition: left 0.3s ease;
+    /* Enables scrolling within sidebar on short screens */
+    overflow-y: auto;
 }
 
 .sidebar-header {
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
     padding: 0.5rem;
     display: flex;
     justify-content: space-between;
@@ -41,7 +44,28 @@ body {
 .logo { font-size: 1.5rem; font-weight: 800; color: white; text-decoration: none; }
 .close-menu { display: none; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; }
 
-.nav-links { list-style: none; flex-grow: 1; }
+/* User Info Styling */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+}
+.user-avatar { font-size: 1.1rem; }
+.user-name {
+    color: #cbd5e1;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Nav links - flex-grow removed so footer isn't pushed down */
+.nav-links { list-style: none; margin-bottom: 1rem; }
 .nav-links ul { list-style: none; }
 
 .nav-item {
@@ -63,8 +87,34 @@ body {
 .nav-item:hover { background: #334155; color: white; }
 .nav-item.active { background: var(--primary); color: white; font-weight: 600; }
 
-.sidebar-footer { padding-top: 1rem; border-top: 1px solid #334155; }
-.logout-link { color: #94a3b8; text-decoration: none; font-size: 0.85rem; cursor: pointer; }
+/* Sidebar Footer (Logout Section) */
+.sidebar-footer {
+    padding-top: 1rem;
+    border-top: 1px solid #334155;
+    margin-top: 1rem;
+    padding-bottom: 1.5rem;
+}
+
+.logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.logout-btn:hover {
+    background: var(--danger);
+    color: white;
+}
 
 /* Content Wrapper */
 .content { flex: 1; margin-left: 260px; padding: 2.5rem; }
@@ -95,33 +145,15 @@ body {
         z-index: 101;
     }
 
-    .menu-toggle {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 1.5rem;
-        cursor: pointer;
-    }
+    .menu-toggle { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
 
     .sidebar {
-        left: -100%; /* Hide off-screen */
+        left: -100%;
         width: 280px;
     }
 
-    .sidebar.open {
-        left: 0; /* Slide in */
-    }
-
-    .sidebar-overlay.active {
-        display: block;
-    }
-
-    .close-menu {
-        display: block;
-    }
-
-    .content {
-        margin-left: 0;
-        padding: 1.5rem;
-    }
+    .sidebar.open { left: 0; }
+    .sidebar-overlay.active { display: block; }
+    .close-menu { display: block; }
+    .content { margin-left: 0; padding: 1.5rem; }
 }

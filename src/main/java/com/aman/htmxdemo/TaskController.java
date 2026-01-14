@@ -1,5 +1,8 @@
 package com.aman.htmxdemo;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,8 +15,8 @@ public class TaskController {
     private final List<String> tasks = new ArrayList<>(List.of("Learn Java 25", "Master HTMX"));
 
     @GetMapping("/")
-    public String index(Model model) {
-        model.addAttribute("tasks", tasks);
+    public String index() {
+        // No need to add Page.empty() anymore because the HTML isn't asking for it!
         return "index";
     }
 

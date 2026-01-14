@@ -1,50 +1,84 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>HTMX + Spring Boot</title>
-    <link rel="stylesheet" href="/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Manager</title>
+    <link rel="stylesheet" th:href="@{/css/expense.css}">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-
-    <!-- Spring Security CSRF -->
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 </head>
-<body hx-boost="true">
+<body>
 
-<script>
-    // Automatically attach CSRF token to every htmx request
-    document.body.addEventListener('htmx:configRequest', function (event) {
-        const token = document.querySelector('meta[name="_csrf"]').content;
-        const header = document.querySelector('meta[name="_csrf_header"]').content;
-        event.detail.headers[header] = token;
+<div class="htmx-indicator" id="loading-bar"></div>
+
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="logo">FinanceApp</a>
+        </div>
+
+        <nav class="nav-links">
+            <ul>
+                <li>
+                    <button class="nav-item"
+                            hx-get="/expenses"
+                            hx-target="#main-content"
+                            hx-push-url="true"
+                            hx-indicator="#loading-bar">
+                        💸 Expenses
+                    </button>
+                </li>
+                <li>
+                    <button class="nav-item"
+                            hx-get="/deposits"
+                            hx-target="#main-content"
+                            hx-push-url="true"
+                            hx-indicator="#loading-bar">
+                        💰 Deposits
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p class="user-name" th:text="${#authentication.name}">User</p>
+            <a th:href="@{/logout}" class="logout-link">Logout</a>
+        </div>
+    </aside>
+
+    <main class="content" id="main-content">
+        <div class="welcome-card">
+            <h1>Welcome Back!</h1>
+            <p>Select a category from the sidebar to manage your records.</p>
+        </div>
+    </main>
+</div>
+
+<script th:inline="javascript">
+    // 1. Handle CSRF for all HTMX requests
+    document.body.addEventListener('htmx:configRequest', (event) => {
+        event.detail.headers['X-CSRF-TOKEN'] = /*[[${_csrf.token}]]*/ '';
+    });
+
+    // 2. Handle "Active" class toggling for Sidebar Buttons
+    document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+        // Only run this if the clicked element was a nav-item
+        if (evt.detail.elt.classList.contains('nav-item')) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            evt.detail.elt.classList.add('active');
+        }
+    });
+
+    // 3. Optional: Sync active state if user hits browser 'Back' button
+    window.addEventListener('popstate', function() {
+        if (window.location.pathname.includes('expenses')) {
+            htmx.ajax('GET', '/expenses', '#main-content');
+        } else if (window.location.pathname.includes('deposits')) {
+            htmx.ajax('GET', '/deposits', '#main-content');
+        }
     });
 </script>
-
-<div class="container">
-    <h1>My Tasks</h1>
-
-    <form hx-post="/add-task"
-          hx-target="#task-list-container"
-          hx-swap="innerHTML"
-          hx-on::after-request="this.reset()">
-        <input type="text" name="taskName" placeholder="What needs to be done?" required>
-        <button type="submit">Add Task</button>
-    </form>
-
-    <div id="task-list-container">
-        <ul id="task-list" th:fragment="task-list">
-            <li th:each="task, iter : ${tasks}" th:id="'task-' + ${iter.index}">
-                <span th:text="${task}">Task Name</span>
-                <button class="delete-btn"
-                        th:hx-delete="'/delete-task/' + ${iter.index}"
-                        th:hx-target="'#task-' + ${iter.index}"
-                        hx-swap="outerHTML">
-                    Delete
-                </button>
-            </li>
-        </ul>
-    </div>
-</div>
 
 </body>
 </html>

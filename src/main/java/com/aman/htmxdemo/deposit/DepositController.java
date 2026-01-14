@@ -31,6 +31,7 @@ public class DepositController {
         Page<Deposit> depositPage = depositRepository.findAll(pageable);
         model.addAttribute("deposits", depositPage);
         model.addAttribute("currentUser", currentUser);
+        model.addAttribute("activeTab", "deposits");
         return isHtmx ? "deposit/deposit :: deposit-table-container" : "deposit/deposit";
     }
 
@@ -79,8 +80,32 @@ public class DepositController {
         return refreshTable(model, currentUser, pageable);
     }
 
+    // Add this missing endpoint to your controller
+    @PostMapping("/{id}/authorize")
+    @PreAuthorize("hasRole('AUTHORIZER')")
+    public String authorizeDeposit(@PathVariable UUID id,
+                                   @AuthenticationPrincipal User currentUser,
+                                   Model model,
+                                   @PageableDefault(size = 10) Pageable pageable) {
+
+        Deposit deposit = depositRepository.findById(id).orElseThrow();
+
+        // Dual-control check
+        if (deposit.getInputter().equals(currentUser.getEmail())) {
+            throw new RuntimeException("Cannot authorize your own deposit");
+        }
+
+        deposit.setEntityStatus(EntityStatus.AUTHORIZED.name());
+        deposit.setAuthorizer(currentUser.getEmail());
+        depositRepository.save(deposit);
+
+        return refreshTable(model, currentUser, pageable);
+    }
+
     private String refreshTable(Model model, User user, Pageable pageable) {
-        model.addAttribute("deposits", depositRepository.findAll(pageable));
+        Page<Deposit> depositPage = depositRepository.findAll(pageable);
+        // Ensure deposits is never null to prevent SpEL errors
+        model.addAttribute("deposits", depositPage != null ? depositPage : Page.empty());
         model.addAttribute("currentUser", user);
         return "deposit/deposit :: deposit-table-container";
     }

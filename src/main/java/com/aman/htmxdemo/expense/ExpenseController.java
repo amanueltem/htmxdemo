@@ -36,6 +36,7 @@ public class ExpenseController {
         Page<Expense> expensePage = expenseRepository.findAll(pageable);
         model.addAttribute("expenses", expensePage);
         model.addAttribute("currentUser", currentUser);
+        model.addAttribute("activeTab", "expenses");
 
         if (isHtmx) {
             return "expense/expense :: expense-table-container";
@@ -46,7 +47,7 @@ public class ExpenseController {
     @GetMapping("/new")
     @PreAuthorize("hasRole('INPUTTER')")
     public String showCreateForm(Model model) {
-        model.addAttribute("expense", new Expense());
+        model.addAttribute("expenses", new Expense());
         return "expense/expense-form :: expense-form";
     }
 
@@ -138,7 +139,9 @@ public class ExpenseController {
     // Helper to avoid code duplication
     private String refreshTableFragment(Model model, User currentUser, Pageable pageable) {
         Page<Expense> expensePage = expenseRepository.findAll(pageable);
-        model.addAttribute("expenses", expensePage);
+
+        // Ensure we never pass a null 'expenses' object to the fragment
+        model.addAttribute("expenses", expensePage != null ? expensePage : Page.empty());
         model.addAttribute("currentUser", currentUser);
         return "expense/expense :: expense-table-container";
     }

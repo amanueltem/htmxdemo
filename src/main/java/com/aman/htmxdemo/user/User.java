@@ -1,4 +1,6 @@
 package com.aman.htmxdemo.user;
+import com.aman.htmxdemo.deposit.Deposit;
+import com.aman.htmxdemo.group.GroupMember;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -31,7 +33,7 @@ public class User implements UserDetails, Principal {
 
     @Id
     @GeneratedValue
-    private UUID id;
+    private Long id;
 
     private String fullName;
     private String phoneNumber;
@@ -102,6 +104,12 @@ public class User implements UserDetails, Principal {
     public String getName() {
         return email;
     }
+
+
+    //relationships
+    @ManyToOne
+    @JoinColumn(name = "group_member_id")
+    private GroupMember groupMember;
 }
 
 record RegisterRequest(

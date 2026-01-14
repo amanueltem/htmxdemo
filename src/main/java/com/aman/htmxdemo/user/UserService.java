@@ -16,7 +16,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     @Transactional
     public void register(RegisterRequest request){
-        Role role=roleRepo.findByName(RolesEnum.ROLE_USER.name()).orElseThrow(
+        Role role=roleRepo.findByName(RolesEnum.ROLE_INPUTTER.name()).orElseThrow(
                 ()-> new EntityNotFoundException("Role user not found.")
         );
         repo.save(User.builder()

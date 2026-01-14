@@ -1,5 +1,7 @@
 package com.aman.htmxdemo;
 
+import com.aman.htmxdemo.group.GroupMember;
+import com.aman.htmxdemo.group.GroupMemberRepository;
 import com.aman.htmxdemo.user.*;
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,8 +28,14 @@ public class HtmxdemoApplication {
     }
 
     @Bean
-    public CommandLineRunner runner(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public CommandLineRunner runner(RoleRepository roleRepository,
+                                    UserRepository userRepository,
+                                    GroupMemberRepository groupRepository,
+                                    PasswordEncoder passwordEncoder) {
         return args -> {
+            if(groupRepository.count()==0){
+                groupRepository.save(GroupMember.builder().name("Gangs of Four").build());
+            }
             // Create roles if not exist
             for (RolesEnum roleEnum : RolesEnum.values()) {
                 roleRepository.findByName(roleEnum.name())

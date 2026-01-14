@@ -1,31 +1,20 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Manager</title>
-    <link rel="stylesheet" th:href="@{/css/expense.css}">
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-</head>
-<body>
-
 <div id="main-content-wrapper" th:fragment="expense-table-container">
-
-    <div class="header-section">
+    <div class="content-header">
         <h2>Expense Dashboard</h2>
         <button sec:authorize="hasRole('INPUTTER')"
                 class="btn btn-primary"
                 hx-get="/expenses/new"
                 hx-target="#modals-here">
-            + New Record
+            + New Expense
         </button>
     </div>
 
-    <div id="expense-table-container" class="table-container">
-        <table>
+    <div class="card-container">
+        <table class="data-table">
             <thead>
             <tr>
                 <th>Date</th>
+                <th>Time</th>
                 <th>Amount</th>
                 <th>Status</th>
                 <th>Inputter</th>
@@ -35,79 +24,51 @@
             <tbody>
             <tr th:each="expense : ${expenses.content}">
                 <td th:text="${expense.date}"></td>
+                <td th:text="${expense.timeSpan}"></td>
                 <td th:text="${#numbers.formatDecimal(expense.amount, 1, 2)}"></td>
                 <td>
-            <span class="badge"
-                  th:classappend="${expense.entityStatus == 'AUTHORIZED' ? 'bg-success' : 'bg-warning'}"
-                  th:text="${expense.entityStatus}">
-            </span>
+                        <span class="status-badge"
+                              th:classappend="${expense.entityStatus == 'AUTHORIZED' ? 'status-success' : 'status-warning'}"
+                              th:text="${expense.entityStatus}"></span>
                 </td>
                 <td th:text="${expense.inputter}"></td>
                 <td>
-                    <div class="action-group">
-                        <button th:if="${expense.entityStatus != 'AUTHORIZED'}"
+                    <div class="action-group" style="display: flex; gap: 5px;">
+                        <button th:if="${expense.entityStatus != 'AUTHORIZED' and (currentUser != null and expense.inputter == currentUser.email)}"
                                 sec:authorize="hasRole('INPUTTER')"
-                                class="btn btn-sm btn-outline"
+                                class="btn btn-outline btn-sm"
                                 th:hx-get="@{/expenses/edit/{id}(id=${expense.id})}"
-                                hx-target="#modals-here">
-                            Edit
-                        </button>
+                                hx-target="#modals-here">Edit</button>
 
-                        <button th:if="${expense.entityStatus == 'UNAUTHORIZED'}"
+                        <button th:if="${expense.entityStatus == 'UNAUTHORIZED' and (currentUser != null and expense.inputter == currentUser.email)}"
                                 sec:authorize="hasRole('INPUTTER')"
-                                class="btn btn-sm btn-danger"
+                                class="btn btn-danger btn-sm"
                                 th:hx-delete="@{/expenses/{id}(id=${expense.id})}"
                                 hx-target="#main-content-wrapper"
                                 hx-swap="outerHTML"
-                                hx-confirm="Are you sure?">
-                            Delete
-                        </button>
+                                hx-confirm="Confirm Deletion?">Delete</button>
 
                         <button th:if="${expense.entityStatus == 'UNAUTHORIZED' and (currentUser != null and expense.inputter != currentUser.email)}"
                                 sec:authorize="hasRole('AUTHORIZER')"
-                                class="btn btn-sm btn-success"
+                                class="btn btn-primary btn-sm"
                                 th:hx-post="@{/expenses/{id}/authorize(id=${expense.id})}"
                                 hx-target="#main-content-wrapper"
-                                hx-swap="outerHTML">
-                            Authorize
-                        </button>
+                                hx-swap="outerHTML">Authorize</button>
                     </div>
-                </td>
-            </tr>
-
-            <tr th:if="${expenses == null or expenses.totalElements == 0}">
-                <td colspan="5" style="text-align: center; padding: 3rem; color: #64748b;">
-                    <p>No records found.</p>
                 </td>
             </tr>
             </tbody>
         </table>
 
         <div class="pagination-bar" th:if="${expenses.totalPages > 1}">
-            <button th:if="${expenses.hasPrevious()}"
-                    class="btn btn-sm"
+            <button th:if="${expenses.hasPrevious()}" class="btn btn-outline btn-sm"
                     th:hx-get="@{/expenses(page=${expenses.number - 1})}"
-                    hx-target="#main-content-wrapper"
-                    hx-swap="outerHTML">Previous</button>
-
-            <span class="page-info" th:text="'Page ' + (${expenses.number} + 1) + ' of ' + ${expenses.totalPages}"></span>
-
-            <button th:if="${expenses.hasNext()}"
-                    class="btn btn-sm"
+                    hx-target="#main-content-wrapper" hx-swap="outerHTML">Previous</button>
+            <span th:text="'Page ' + (${expenses.number} + 1) + ' of ' + ${expenses.totalPages}"></span>
+            <button th:if="${expenses.hasNext()}" class="btn btn-outline btn-sm"
                     th:hx-get="@{/expenses(page=${expenses.number + 1})}"
-                    hx-target="#main-content-wrapper"
-                    hx-swap="outerHTML">Next</button>
+                    hx-target="#main-content-wrapper" hx-swap="outerHTML">Next</button>
         </div>
     </div>
-
     <div id="modals-here"></div>
-
-    <script th:inline="javascript">
-        document.body.addEventListener('htmx:configRequest', (event) => {
-            event.detail.headers['X-CSRF-TOKEN'] = /*[[${_csrf.token}]]*/ '';
-        });
-    </script>
 </div>
-
-</body>
-</html>

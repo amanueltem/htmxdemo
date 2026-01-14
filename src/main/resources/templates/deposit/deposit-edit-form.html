@@ -1,0 +1,13 @@
+<div class="modal-overlay" id="modal-edit" th:fragment="deposit-edit-form">
+    <div class="modal-content">
+        <h3>Edit Deposit Record</h3>
+        <form th:hx-post="@{/deposits/{id}(id=${deposit.id})}" hx-target="#deposit-table-container" hx-swap="outerHTML" hx-on::after-request="document.getElementById('modal-edit').remove()">
+            <div class="form-group"><label>Date</label><input type="date" name="date" th:value="${deposit.date}" class="form-control" required></div>
+            <div class="form-group"><label>Amount</label><input type="number" step="0.01" name="amount" th:value="${deposit.amount}" class="form-control" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn" onclick="document.getElementById('modal-edit').remove()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+        </form>
+    </div>
+</div>

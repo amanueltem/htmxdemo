@@ -1,0 +1,87 @@
+package com.aman.htmxdemo.deposit;
+
+import com.aman.htmxdemo.common.EntityStatus;
+import com.aman.htmxdemo.user.User;
+import com.aman.htmxdemo.user.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
+
+@Controller
+@RequestMapping("/deposits")
+@RequiredArgsConstructor
+public class DepositController {
+
+    private final DepositRepository depositRepository;
+    private final UserRepository userRepository;
+
+    @GetMapping
+    public String listDeposits(Model model,
+                               @AuthenticationPrincipal User currentUser,
+                               @RequestHeader(value = "HX-Request", required = false) boolean isHtmx,
+                               @PageableDefault(size = 10) Pageable pageable) {
+        Page<Deposit> depositPage = depositRepository.findAll(pageable);
+        model.addAttribute("deposits", depositPage);
+        model.addAttribute("currentUser", currentUser);
+        return isHtmx ? "deposit/deposit :: deposit-table-container" : "deposit/deposit";
+    }
+
+    @GetMapping("/new")
+    @PreAuthorize("hasRole('INPUTTER')")
+    public String showCreateForm(Model model) {
+        model.addAttribute("deposit", new Deposit());
+        return "deposit/deposit-form :: deposit-form";
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('INPUTTER')")
+    public String createDeposit(@ModelAttribute Deposit deposit,
+                                @AuthenticationPrincipal User currentUser,
+                                Model model, @PageableDefault(size = 10) Pageable pageable) {
+        deposit.setEntityStatus(EntityStatus.UNAUTHORIZED.name());
+        deposit.setInputter(currentUser.getEmail());
+        depositRepository.save(deposit);
+        return refreshTable(model, currentUser, pageable);
+    }
+
+    @GetMapping("/edit/{id}")
+    @PreAuthorize("hasRole('INPUTTER')")
+    public String showEditForm(@PathVariable UUID id, Model model) {
+        Deposit deposit = depositRepository.findById(id).orElseThrow();
+        model.addAttribute("deposit", deposit);
+        return "deposit/deposit-edit-form :: deposit-edit-form";
+    }
+
+    @PostMapping("/{id}")
+    @PreAuthorize("hasRole('INPUTTER')")
+    public String updateDeposit(@PathVariable UUID id, @ModelAttribute Deposit depositDetails,
+                                @AuthenticationPrincipal User currentUser, Model model, @PageableDefault(size = 10) Pageable pageable) {
+        Deposit existing = depositRepository.findById(id).orElseThrow();
+        existing.setAmount(depositDetails.getAmount());
+        existing.setDate(depositDetails.getDate());
+        existing.setEntityStatus(EntityStatus.UNAUTHORIZED.name());
+        depositRepository.save(existing);
+        return refreshTable(model, currentUser, pageable);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('INPUTTER')")
+    public String deleteDeposit(@PathVariable UUID id, @AuthenticationPrincipal User currentUser, Model model, @PageableDefault(size = 10) Pageable pageable) {
+        depositRepository.deleteById(id);
+        return refreshTable(model, currentUser, pageable);
+    }
+
+    private String refreshTable(Model model, User user, Pageable pageable) {
+        model.addAttribute("deposits", depositRepository.findAll(pageable));
+        model.addAttribute("currentUser", user);
+        return "deposit/deposit :: deposit-table-container";
+    }
+}

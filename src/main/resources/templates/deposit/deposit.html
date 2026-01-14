@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Deposit Management</title>
+    <link rel="stylesheet" th:href="@{/css/expense.css}">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+<div class="header-section">
+    <h2>Deposit Dashboard</h2>
+    <button sec:authorize="hasRole('INPUTTER')" class="btn btn-primary" hx-get="/deposits/new" hx-target="#modals-here">
+        + New Deposit
+    </button>
+</div>
+
+<div id="deposit-table-container" th:fragment="deposit-table-container" class="table-container">
+    <table>
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Inputter</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="deposit : ${deposits}">
+            <td th:text="${deposit.date}"></td>
+            <td th:text="${deposit.amount}"></td>
+            <td><span class="badge" th:classappend="${deposit.entityStatus == 'AUTHORIZED' ? 'bg-success' : 'bg-warning'}" th:text="${deposit.entityStatus}"></span></td>
+            <td th:text="${deposit.inputter}"></td>
+            <td>
+                <div class="action-group">
+                    <button th:if="${deposit.entityStatus == 'UNAUTHORIZED'}" sec:authorize="hasRole('INPUTTER')"
+                            class="btn btn-sm btn-outline" th:hx-get="@{/deposits/edit/{id}(id=${deposit.id})}" hx-target="#modals-here">Edit</button>
+
+                    <button th:if="${deposit.entityStatus == 'UNAUTHORIZED'}" sec:authorize="hasRole('INPUTTER')"
+                            class="btn btn-sm btn-danger" th:hx-delete="@{/deposits/{id}(id=${deposit.id})}" hx-target="#deposit-table-container" hx-swap="outerHTML" hx-confirm="Delete this deposit?">Delete</button>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div id="modals-here"></div>
+<script th:inline="javascript">
+    document.body.addEventListener('htmx:configRequest', (event) => {
+        event.detail.headers['X-CSRF-TOKEN'] = /*[[${_csrf.token}]]*/ '';
+    });
+</script>
+</body>
+</html>

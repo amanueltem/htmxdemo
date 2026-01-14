@@ -1,6 +1,7 @@
 package com.aman.htmxdemo.expense;
 
 import com.aman.htmxdemo.common.EntityStatus;
+import com.aman.htmxdemo.handler.OperationNotPermittedException;
 import com.aman.htmxdemo.user.User;
 import com.aman.htmxdemo.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -41,8 +42,6 @@ public class ExpenseController {
         }
         return "expense/expense";
     }
-
-    // --- MAKER FLOW (INPUTTER) ---
 
     @GetMapping("/new")
     @PreAuthorize("hasRole('INPUTTER')")
@@ -92,6 +91,9 @@ public class ExpenseController {
 
         if (EntityStatus.AUTHORIZED.name().equals(existingExpense.getEntityStatus())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update authorized record");
+        }
+        if(!currentUser.getEmail().equals(existingExpense.getInputter())){
+            throw  new OperationNotPermittedException("This is not your record.");
         }
 
         existingExpense.setAmount(expenseDetails.getAmount());
@@ -151,14 +153,11 @@ public class ExpenseController {
         Expense expense = expenseRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        // Security check: Only delete if UNAUTHORIZED
         if (!EntityStatus.UNAUTHORIZED.name().equals(expense.getEntityStatus())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot delete authorized records");
+            throw new OperationNotPermittedException("you can  delete  only unauthorized data");
         }
-
-        // Optional: Only allow the person who created it to delete it
         if (!expense.getInputter().equals(currentUser.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own records");
+            throw new OperationNotPermittedException("This is not your record.");
         }
 
         expenseRepository.delete(expense);

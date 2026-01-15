@@ -11,16 +11,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" th:href="@{/css/chart.css}">
     <style>
-        /* Loading Animation logic */
         .report-loader { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; }
         .htmx-request .report-loader { display: flex; }
         .htmx-request .dashboard-wrapper { display: none; }
         .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Date Picker Styling */
         .date-nav-wrapper { display: flex; align-items: center; gap: 8px; background: white; padding: 5px 10px; border-radius: 10px; border: 1px solid #e2e8f0; }
-        .nav-arrow { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #3b82f6; padding: 0 5px; }
         .month-picker { border: none; font-weight: 600; font-family: inherit; cursor: pointer; outline: none; }
     </style>
 </head>
@@ -32,7 +28,6 @@
 <header class="mobile-header">
     <button class="menu-toggle" onclick="toggleMenu()">☰</button>
     <span class="logo">FinanceApp</span>
-    <div style="width: 40px;"></div>
 </header>
 
 <div class="app-layout">
@@ -43,7 +38,7 @@
         </div>
         <div class="user-info">
             <span class="user-avatar">👤</span>
-            <p class="user-name" th:text="${#authentication.name}">User</p>
+            <p class="user-name" th:text="${#authentication.getName()}">User</p>
         </div>
         <nav class="nav-links">
             <ul>
@@ -81,45 +76,37 @@
 
                 <div class="dashboard-header" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <h2 class="room-title">Fund Analytics</h2>
-
                     <div class="date-nav-wrapper">
-                        <input type="month"
-                               name="date"
-                               id="monthInput"
-                               th:value="${selectedDate}"
-                               th:max="${#temporals.format(#temporals.createNow(), 'yyyy-MM')}"
-                               hx-get="/reports"
-                               hx-trigger="change"
-                               hx-target="#report-display-area"
-                               class="month-picker">
+                        <input type="month" name="date" id="monthInput" th:value="${selectedDate}"
+                               hx-get="/reports" hx-trigger="change" hx-target="#report-display-area" class="month-picker">
                     </div>
                 </div>
 
-                <div class="main-balance-card" th:classappend="${report.availableBalance < 0 ? 'negative' : 'positive'}">
+                <div class="main-balance-card" th:classappend="${report.isNegative() ? 'negative' : 'positive'}">
                     <span class="label">Net Authorized Room Fund</span>
-                    <h1 th:text="${#numbers.formatDecimal(report.availableBalance, 1, 2) + ' ETB'}">0.00</h1>
+                    <h1 th:text="${report.formattedBalance()}">0.00 ETB</h1>
                     <small style="color: #94a3b8;">Includes all historical legacy</small>
                 </div>
 
                 <div class="stats-row">
                     <div class="stat-item">
                         <span class="small-label">Carry Over</span>
-                        <span class="value" th:text="${#numbers.formatDecimal(report.openingBalance, 1, 2)}">0.00</span>
+                        <span class="value" th:text="${report.openingBalance()}">0.00</span>
                     </div>
                     <div class="stat-item">
                         <span class="small-label">New (Auth)</span>
-                        <span class="value success" th:text="${'+' + #numbers.formatDecimal(report.monthDeposits, 1, 2)}">0</span>
+                        <span class="value success" th:text="${report.monthDeposits()}">0</span>
                     </div>
                     <div class="stat-item">
                         <span class="small-label">Spent (Auth)</span>
-                        <span class="value danger" th:text="${'-' + #numbers.formatDecimal(report.monthExpenses, 1, 2)}">0</span>
+                        <span class="value danger" th:text="${report.monthExpenses()}">0</span>
                     </div>
                 </div>
 
                 <div class="chart-container-box">
                     <div class="canvas-holder">
                         <canvas id="categoryPieChart"></canvas>
-                        <div th:if="${report.categoryBreakdown.empty}" class="no-data">
+                        <div th:if="${report.hasNoData()}" class="no-data">
                             No authorized expenses this month.
                         </div>
                     </div>
@@ -127,7 +114,7 @@
 
                 <script th:inline="javascript">
                     (function() {
-                        const data = /*[[${report.categoryBreakdown}]]*/ {};
+                        const data = /*[[${report.categoryBreakdown()}]]*/ {};
                         const ctx = document.getElementById('categoryPieChart');
                         if (ctx && Object.keys(data).length > 0) {
                             if (window.myChart) window.myChart.destroy();
@@ -163,23 +150,9 @@
         document.getElementById('sidebar').classList.toggle('open');
         document.getElementById('overlay').classList.toggle('active');
     }
-
-    function closeMenuOnSelect() {
-        if (window.innerWidth <= 768) {
-            toggleMenu();
-        }
-    }
-
+    function closeMenuOnSelect() { if (window.innerWidth <= 768) toggleMenu(); }
     document.body.addEventListener('htmx:configRequest', (event) => {
         event.detail.headers['X-CSRF-TOKEN'] = /*[[${_csrf.token}]]*/ '';
-    });
-
-    // Handle Active State for sidebar items
-    document.body.addEventListener('htmx:afterOnLoad', function(evt) {
-        if (evt.detail.elt.classList.contains('nav-item')) {
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            evt.detail.elt.classList.add('active');
-        }
     });
 </script>
 </body>

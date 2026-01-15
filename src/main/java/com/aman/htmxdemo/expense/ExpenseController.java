@@ -76,6 +76,7 @@ public class ExpenseController {
         }
 
         model.addAttribute("expense", expense);
+        model.addAttribute("timeSpans", TimeSpan.values());
         return "expense/expense-edit-form :: expense-edit-form";
     }
 

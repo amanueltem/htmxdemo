@@ -27,9 +27,10 @@ public class Expense extends BaseEntity {
     private String timeSpan;
 }
 
- enum TimeSpan {
+enum TimeSpan {
     BREAKFAST,
     LUNCH,
     DINNER,
+    GROCERIES,
     OTHER
 }

@@ -12,10 +12,11 @@
             <div class="form-group">
                 <label>Time Span</label>
                 <select name="timeSpan" class="form-control">
-                    <option th:selected="${expense.timeSpan == 'BREAKFAST'}" value="BREAKFAST">BREAKFAST</option>
-                    <option th:selected="${expense.timeSpan == 'LUNCH'}" value="LUNCH">LUNCH</option>
-                    <option th:selected="${expense.timeSpan == 'DINNER'}" value="DINNER">DINNER</option>
-                    <option th:selected="${expense.timeSpan == 'OTHER'}" value="OTHER">OTHER</option>
+                    <option th:each="ts : ${timeSpans}"
+                            th:value="${ts}"
+                            th:text="${ts}"
+                            th:selected="${ts.name() == expense.timeSpan}">
+                    </option>
                 </select>
             </div>
             <div class="form-group">

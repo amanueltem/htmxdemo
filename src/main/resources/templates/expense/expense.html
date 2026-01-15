@@ -34,7 +34,7 @@
                 <td data-label="Inputter" th:text="${expense.inputter}"></td>
                 <td data-label="Actions">
                     <div class="action-group" style="display: flex; gap: 5px;">
-                        <button th:if="${expense.entityStatus != 'AUTHORIZED' and (currentUser != null and expense.inputter == currentUser.email)}"
+                        <button th:if="${expense.entityStatus == 'UNAUTHORIZED' and (currentUser != null and expense.inputter == currentUser.email)}"
                                 sec:authorize="hasRole('INPUTTER')"
                                 class="btn btn-outline btn-sm"
                                 th:hx-get="@{/expenses/edit/{id}(id=${expense.id})}"
@@ -54,6 +54,26 @@
                                 th:hx-post="@{/expenses/{id}/authorize(id=${expense.id})}"
                                 hx-target="#main-content-wrapper"
                                 hx-swap="outerHTML">Authorize</button>
+                        <button th:if="${expense.entityStatus == 'AUTHORIZED'
+        and (currentUser != null and expense.inputter == currentUser.email)}"
+                                sec:authorize="hasRole('INPUTTER')"
+                                class="btn btn-warning btn-sm"
+                                th:hx-get="@{/expenses/{id}/edit-request(id=${expense.id})}"
+                                hx-target="#modals-here">
+                            Edit Request
+                        </button>
+                        <button th:if="${expense.entityStatus == 'EDIT_REQUEST'
+        and currentUser != null
+        and expense.authorizer == currentUser.email}"
+                                sec:authorize="hasRole('AUTHORIZER')"
+                                class="btn btn-success btn-sm"
+                                th:hx-post="@{/expenses/{id}/accept-edit-request(id=${expense.id})}"
+                                hx-target="#main-content-wrapper"
+                                hx-swap="outerHTML"
+                                hx-confirm="Accept edit request and unlock this record?">
+                            Accept Edit Request
+                        </button>
+
                     </div>
                 </td>
             </tr>

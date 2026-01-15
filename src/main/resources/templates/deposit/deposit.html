@@ -33,7 +33,7 @@
                 <td data-label="Inputter" th:text="${deposit.inputter}"></td>
                 <td data-label="Actions">
                     <div class="action-group">
-                        <button th:if="${deposit.entityStatus == 'UNAUTHORIZED'}"
+                        <button th:if="${deposit.entityStatus == 'UNAUTHORIZED' and (currentUser != null and deposit.inputter == currentUser.email)}"
                                 sec:authorize="hasRole('INPUTTER')"
                                 class="btn btn-outline btn-sm"
                                 th:hx-get="@{/deposits/edit/{id}(id=${deposit.id})}"
@@ -41,7 +41,7 @@
                             Edit
                         </button>
 
-                        <button th:if="${deposit.entityStatus == 'UNAUTHORIZED'}"
+                        <button th:if="${deposit.entityStatus == 'UNAUTHORIZED' and (currentUser != null and deposit.inputter == currentUser.email)}"
                                 sec:authorize="hasRole('INPUTTER')"
                                 class="btn btn-danger btn-sm"
                                 th:hx-delete="@{/deposits/{id}(id=${deposit.id})}"
@@ -59,6 +59,25 @@
                                 hx-swap="outerHTML"
                                 hx-confirm="Authorize this deposit?">
                             Authorize
+                        </button>
+                        <button th:if="${deposit.entityStatus == 'AUTHORIZED'
+        and (currentUser != null and deposit.inputter == currentUser.email)}"
+                                sec:authorize="hasRole('INPUTTER')"
+                                class="btn btn-warning btn-sm"
+                                th:hx-get="@{/deposits/{id}/edit-request(id=${deposit.id})}"
+                                hx-target="#modals-here">
+                            Edit Request
+                        </button>
+                        <button th:if="${deposit.entityStatus == 'EDIT_REQUEST'
+        and currentUser != null
+        and deposit.authorizer == currentUser.email}"
+                                sec:authorize="hasRole('AUTHORIZER')"
+                                class="btn btn-success btn-sm"
+                                th:hx-post="@{/deposits/{id}/accept-edit-request(id=${deposit.id})}"
+                                hx-target="#main-content-wrapper"
+                                hx-swap="outerHTML"
+                                hx-confirm="Accept edit request and unlock this record?">
+                            Accept Edit Request
                         </button>
                     </div>
                 </td>

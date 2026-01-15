@@ -137,6 +137,89 @@ public class ExpenseController {
         return refreshTableFragment(model, currentUser, pageable);
     }
 
+
+    @GetMapping("/{id}/edit-request")
+    @PreAuthorize("hasRole('INPUTTER')")
+    public String showEditRequestForm(@PathVariable UUID id,
+                                      @AuthenticationPrincipal User currentUser,
+                                      Model model) {
+
+        Expense expense = expenseRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (!EntityStatus.AUTHORIZED.name().equals(expense.getEntityStatus())) {
+            throw new OperationNotPermittedException("Edit request allowed only for AUTHORIZED records");
+        }
+
+        if (!expense.getInputter().equals(currentUser.getEmail())) {
+            throw new OperationNotPermittedException("This is not your record");
+        }
+
+        model.addAttribute("expense", expense);
+        return "expense/expense-edit-request :: expense-edit-request-form";
+    }
+
+    @PostMapping("/{id}/edit-request")
+    @PreAuthorize("hasRole('INPUTTER')")
+    public String submitEditRequest(@PathVariable UUID id,
+                                    @RequestParam String editRequestRemark,
+                                    @AuthenticationPrincipal User currentUser,
+                                    Model model,
+                                    @PageableDefault(size = 10) Pageable pageable) {
+
+        if (editRequestRemark == null || editRequestRemark.trim().isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Edit request remark is required"
+            );
+        }
+
+        Expense expense = expenseRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (!EntityStatus.AUTHORIZED.name().equals(expense.getEntityStatus())) {
+            throw new OperationNotPermittedException("Invalid state for edit request");
+        }
+
+        if (!expense.getInputter().equals(currentUser.getEmail())) {
+            throw new OperationNotPermittedException("This is not your record");
+        }
+
+        expense.setEditRequestRemark(editRequestRemark);
+        expense.setEntityStatus(EntityStatus.EDIT_REQUEST.name());
+
+        expenseRepository.save(expense);
+
+        return refreshTableFragment(model, currentUser, pageable);
+    }
+    @PostMapping("/{id}/accept-edit-request")
+    @PreAuthorize("hasRole('AUTHORIZER')")
+    public String acceptEditRequest(@PathVariable UUID id,
+                                    @AuthenticationPrincipal User currentUser,
+                                    Model model,
+                                    @PageableDefault(size = 10) Pageable pageable) {
+
+        Expense expense = expenseRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (!EntityStatus.EDIT_REQUEST.name().equals(expense.getEntityStatus())) {
+            throw new OperationNotPermittedException("Record is not in EDIT_REQUEST state");
+        }
+
+        if (!currentUser.getEmail().equals(expense.getAuthorizer())) {
+            throw new OperationNotPermittedException(
+                    "Only the original authorizer can accept this edit request"
+            );
+        }
+        expense.setEntityStatus(EntityStatus.UNAUTHORIZED.name());
+        expense.setEditRequestRemark(null);
+
+        expenseRepository.save(expense);
+
+        return refreshTableFragment(model, currentUser, pageable);
+    }
+
+
     // Helper to avoid code duplication
     private String refreshTableFragment(Model model, User currentUser, Pageable pageable) {
         Page<Expense> expensePage = expenseRepository.findAll(pageable);
@@ -169,4 +252,8 @@ public class ExpenseController {
         // Refresh and return the table fragment
         return refreshTableFragment(model, currentUser, pageable);
     }
+
+
+
+
 }

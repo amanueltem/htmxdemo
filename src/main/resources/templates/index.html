@@ -8,6 +8,8 @@
     <link rel="stylesheet" th:href="@{/css/navigation.css}">
     <link rel="stylesheet" th:href="@{/css/expense.css}">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" th:href="@{/css/chart.css}">
 </head>
 <body>
 
@@ -70,9 +72,76 @@
     </aside>
 
     <main class="content" id="main-content">
-        <div class="welcome-card">
-            <h1>Welcome Back!</h1>
-            <p>Select a category from the sidebar to manage your records.</p>
+        <div id="report-display-area"
+             hx-get="/reports"
+             hx-trigger="load"
+             hx-indicator="#loading-bar">
+
+            <div class="dashboard-wrapper" th:fragment="report-chart" th:if="${report != null}">
+
+                <div class="dashboard-header" style="margin-bottom: 1rem;">
+                    <h2 class="room-title">Analytics</h2>
+                    <input type="month"
+                           name="date"
+                           th:value="${selectedDate}"
+                           hx-get="/reports"
+                           hx-trigger="change"
+                           hx-target="#report-display-area"
+                           class="month-picker">
+                </div>
+
+                <div class="main-balance-card" th:classappend="${report.availableBalance < 0 ? 'negative' : 'positive'}">
+                    <span class="label">Available Room Fund</span>
+                    <h1 th:text="${#numbers.formatDecimal(report.availableBalance, 1, 2) + ' ETB'}">0.00</h1>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <span class="small-label">Carry Over</span>
+                        <span class="value" th:text="${#numbers.formatDecimal(report.openingBalance, 1, 2)}">0.00</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="small-label">New Deposits</span>
+                        <span class="value success" th:text="${'+' + #numbers.formatDecimal(report.monthDeposits, 1, 2)}">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="small-label">Monthly Spent</span>
+                        <span class="value danger" th:text="${'-' + #numbers.formatDecimal(report.monthExpenses, 1, 2)}">0</span>
+                    </div>
+                </div>
+
+                <div class="chart-container-box">
+                    <div class="canvas-holder">
+                        <canvas id="categoryPieChart"></canvas>
+                    </div>
+                </div>
+
+                <script th:inline="javascript">
+                    (function() {
+                        const data = /*[[${report.categoryBreakdown}]]*/ {};
+                        const ctx = document.getElementById('categoryPieChart');
+                        if (ctx && Object.keys(data).length > 0) {
+                            if (window.myChart) window.myChart.destroy();
+                            window.myChart = new Chart(ctx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: Object.keys(data),
+                                    datasets: [{
+                                        data: Object.values(data),
+                                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    animation: false,
+                                    plugins: { legend: { position: 'bottom' } }
+                                }
+                            });
+                        }
+                    })();
+                </script>
+            </div>
         </div>
     </main>
 </div>

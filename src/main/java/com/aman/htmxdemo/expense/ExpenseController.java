@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Controller
 @RequestMapping("/expenses")
@@ -34,20 +35,22 @@ public class ExpenseController {
                                @PageableDefault(size = 10) Pageable pageable) {
 
         Page<Expense> expensePage = expenseRepository.findAll(pageable);
-        model.addAttribute("expenses", expensePage);
+        // Transform to record here too
+        Page<ExpenseDisplay> displayPage = expensePage.map(e -> mapToDisplay(e, currentUser));
+
+        model.addAttribute("expenses", displayPage);
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("activeTab", "expenses");
 
-        if (isHtmx) {
-            return "expense/expense :: expense-table-container";
-        }
-        return "expense/expense";
+        return isHtmx ? "expense/expense :: expense-table-container" : "expense/expense";
     }
 
     @GetMapping("/new")
     @PreAuthorize("hasRole('INPUTTER')")
     public String showCreateForm(Model model) {
-        model.addAttribute("expenses", new Expense());
+        model.addAttribute("expense", new Expense());
+        // Convert Enums to Strings here to avoid reflection in the template
+        model.addAttribute("timeSpans", Stream.of(TimeSpan.values()).map(Enum::name).toList());
         return "expense/expense-form :: expense-form";
     }
 
@@ -71,12 +74,13 @@ public class ExpenseController {
         Expense expense = expenseRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense not found"));
 
-        if (EntityStatus.AUTHORIZED.name().equals(expense.getEntityStatus())) {
+        // Check status using String comparison for safety
+        if ("AUTHORIZED".equals(expense.getEntityStatus().toString())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot edit authorized record");
         }
 
         model.addAttribute("expense", expense);
-        model.addAttribute("timeSpans", TimeSpan.values());
+        model.addAttribute("timeSpans", Stream.of(TimeSpan.values()).map(Enum::name).toList());
         return "expense/expense-edit-form :: expense-edit-form";
     }
 
@@ -220,13 +224,44 @@ public class ExpenseController {
     }
 
 
-    // Helper to avoid code duplication
+    // Add this helper method to your ExpenseController
+    private ExpenseDisplay mapToDisplay(Expense e, User currentUser) {
+        String currentEmail = currentUser.getEmail();
+        boolean isInputter = e.getInputter().equals(currentEmail);
+        boolean isAuthorizer = currentEmail.equals(e.getAuthorizer());
+
+        // Check if authorizer is in same group but not the same person
+        boolean canAuthLogic = !isInputter && e.getEntityStatus().equals("UNAUTHORIZED");
+
+        return new ExpenseDisplay(
+                e.getId(),
+                e.getDate().toString(),
+                e.getTimeSpan(),
+                String.format("%.2f", e.getAmount()),
+                e.getEntityStatus(),
+                e.getInputter(),
+                "AUTHORIZED".equals(e.getEntityStatus()),
+                // canEdit
+                "UNAUTHORIZED".equals(e.getEntityStatus()) && isInputter,
+                // canDelete
+                "UNAUTHORIZED".equals(e.getEntityStatus()) && isInputter,
+                // canAuthorize
+                canAuthLogic,
+                // canRequestEdit
+                "AUTHORIZED".equals(e.getEntityStatus()) && isInputter,
+                // canAcceptEditRequest
+                "EDIT_REQUEST".equals(e.getEntityStatus()) && isAuthorizer
+        );
+    }
+
+    // Update your refresh helper
     private String refreshTableFragment(Model model, User currentUser, Pageable pageable) {
         Page<Expense> expensePage = expenseRepository.findAll(pageable);
 
-        // Ensure we never pass a null 'expenses' object to the fragment
-        model.addAttribute("expenses", expensePage != null ? expensePage : Page.empty());
-        model.addAttribute("currentUser", currentUser);
+        // Map to DTOs here so the HTML is logic-free
+        Page<ExpenseDisplay> displayPage = expensePage.map(e -> mapToDisplay(e, currentUser));
+
+        model.addAttribute("expenses", displayPage);
         return "expense/expense :: expense-table-container";
     }
 

@@ -22,71 +22,68 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="expense : ${expenses.content}">
-                <td data-label="Date" th:text="${expense.date}"></td>
-                <td data-label="Time" th:text="${expense.timeSpan}"></td>
-                <td data-label="Amount" th:text="${#numbers.formatDecimal(expense.amount, 1, 2)}"></td>
+            <tr th:each="expense : ${expenses.getContent()}">
+                <td data-label="Date" th:text="${expense.date()}"></td>
+                <td data-label="Time" th:text="${expense.timeSpan()}"></td>
+                <td data-label="Amount" th:text="${expense.amountFormatted()}"></td>
                 <td data-label="Status">
-        <span class="status-badge"
-              th:classappend="${expense.entityStatus == 'AUTHORIZED' ? 'status-success' : 'status-warning'}"
-              th:text="${expense.entityStatus}"></span>
+                    <span class="status-badge"
+                          th:classappend="${expense.isAuthorized() ? 'status-success' : 'status-warning'}"
+                          th:text="${expense.status()}"></span>
                 </td>
-                <td data-label="Inputter" th:text="${expense.inputter}"></td>
+                <td data-label="Inputter" th:text="${expense.inputter()}"></td>
                 <td data-label="Actions">
                     <div class="action-group" style="display: flex; gap: 5px;">
-                        <button th:if="${expense.entityStatus == 'UNAUTHORIZED' and (currentUser != null and expense.inputter == currentUser.email)}"
+
+                        <button th:if="${expense.canEdit()}"
                                 sec:authorize="hasRole('INPUTTER')"
                                 class="btn btn-outline btn-sm"
-                                th:hx-get="@{/expenses/edit/{id}(id=${expense.id})}"
+                                th:hx-get="@{/expenses/edit/{id}(id=${expense.id()})}"
                                 hx-target="#modals-here">Edit</button>
 
-                        <button th:if="${expense.entityStatus == 'UNAUTHORIZED' and (currentUser != null and expense.inputter == currentUser.email)}"
+                        <button th:if="${expense.canDelete()}"
                                 sec:authorize="hasRole('INPUTTER')"
                                 class="btn btn-danger btn-sm"
-                                th:hx-delete="@{/expenses/{id}(id=${expense.id})}"
+                                th:hx-delete="@{/expenses/{id}(id=${expense.id()})}"
                                 hx-target="#main-content-wrapper"
                                 hx-swap="outerHTML"
                                 hx-confirm="Confirm Deletion?">Delete</button>
 
-                        <button th:if="${expense.entityStatus == 'UNAUTHORIZED' and (currentUser != null and expense.inputter != currentUser.email)}"
+                        <button th:if="${expense.canAuthorize()}"
                                 sec:authorize="hasRole('AUTHORIZER')"
                                 class="btn btn-primary btn-sm"
-                                th:hx-post="@{/expenses/{id}/authorize(id=${expense.id})}"
+                                th:hx-post="@{/expenses/{id}/authorize(id=${expense.id()})}"
                                 hx-target="#main-content-wrapper"
                                 hx-swap="outerHTML">Authorize</button>
-                        <button th:if="${expense.entityStatus == 'AUTHORIZED'
-        and (currentUser != null and expense.inputter == currentUser.email)}"
+
+                        <button th:if="${expense.canRequestEdit()}"
                                 sec:authorize="hasRole('INPUTTER')"
                                 class="btn btn-warning btn-sm"
-                                th:hx-get="@{/expenses/{id}/edit-request(id=${expense.id})}"
-                                hx-target="#modals-here">
-                            Edit Request
-                        </button>
-                        <button th:if="${expense.entityStatus == 'EDIT_REQUEST'
-        and currentUser != null
-        and expense.authorizer == currentUser.email}"
+                                th:hx-get="@{/expenses/{id}/edit-request(id=${expense.id()})}"
+                                hx-target="#modals-here">Edit Request</button>
+
+                        <button th:if="${expense.canAcceptEditRequest()}"
                                 sec:authorize="hasRole('AUTHORIZER')"
                                 class="btn btn-success btn-sm"
-                                th:hx-post="@{/expenses/{id}/accept-edit-request(id=${expense.id})}"
+                                th:hx-post="@{/expenses/{id}/accept-edit-request(id=${expense.id()})}"
                                 hx-target="#main-content-wrapper"
                                 hx-swap="outerHTML"
-                                hx-confirm="Accept edit request and unlock this record?">
-                            Accept Edit Request
-                        </button>
-
+                                hx-confirm="Accept edit request?">Accept Edit</button>
                     </div>
                 </td>
             </tr>
             </tbody>
         </table>
 
-        <div class="pagination-bar" th:if="${expenses.totalPages > 1}">
+        <div class="pagination-bar" th:if="${expenses.getTotalPages() > 1}">
             <button th:if="${expenses.hasPrevious()}" class="btn btn-outline btn-sm"
-                    th:hx-get="@{/expenses(page=${expenses.number - 1})}"
+                    th:hx-get="@{/expenses(page=${expenses.getNumber() - 1})}"
                     hx-target="#main-content-wrapper" hx-swap="outerHTML">Previous</button>
-            <span th:text="'Page ' + (${expenses.number} + 1) + ' of ' + ${expenses.totalPages}"></span>
+
+            <span th:text="'Page ' + (${expenses.getNumber()} + 1) + ' of ' + ${expenses.getTotalPages()}"></span>
+
             <button th:if="${expenses.hasNext()}" class="btn btn-outline btn-sm"
-                    th:hx-get="@{/expenses(page=${expenses.number + 1})}"
+                    th:hx-get="@{/expenses(page=${expenses.getNumber() + 1})}"
                     hx-target="#main-content-wrapper" hx-swap="outerHTML">Next</button>
         </div>
     </div>

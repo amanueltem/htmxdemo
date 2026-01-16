@@ -2,15 +2,36 @@ spring:
   application:
     name: htmxdemo
 
+  # Database Configuration
   datasource:
     url: ${HTMX_DB_URL}
     username: ${HTMX_DB_USERNAME}
     password: ${HTMX_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 4  # Keep this low for Free Tier RAM (Neon & Render)
+      minimum-idle: 1
 
   jpa:
+    open-in-view: false      # Saves memory by closing DB connections faster
+    show-sql: false          # Stop printing SQL to console
     hibernate:
       ddl-auto: update
-    show-sql: true
     properties:
       hibernate:
+        format_sql: false    # No CPU wasted formatting strings
+        highlight_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # Disable the Spring Banner (Saves a few KB of startup memory)
+  main:
+    banner-mode: "off"
+
+# Logging Strategy: Only show what matters
+logging:
+  pattern:
+    console: "%d{HH:mm:ss} %-5level %logger{15} : %m%n" # Shorten logs to save IO
+  level:
+    root: WARN               # Only show warnings/errors by default
+    com.aman: INFO           # Allow your own app logic to log at INFO
+    org.springframework: WARN
+    org.hibernate.SQL: ERROR # Explicitly kill Hibernate logs

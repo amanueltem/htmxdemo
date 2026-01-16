@@ -22,16 +22,20 @@
             </thead>
             <tbody>
             <tr th:each="deposit : ${depositList}">
-                <td th:text="${deposit.date}"></td>
-                <td th:text="${deposit.amountFormatted}"></td>
-                <td>
+                <td data-label="Date" th:text="${deposit.date}"></td>
+
+                <td data-label="Amount" th:text="${deposit.amountFormatted}"></td>
+
+                <td data-label="Status">
                     <span class="status-badge"
                           th:classappend="${deposit.status == 'AUTHORIZED' ? 'status-success' : 'status-warning'}"
                           th:text="${deposit.status}">
                     </span>
                 </td>
-                <td th:text="${deposit.inputter}"></td>
-                <td>
+
+                <td data-label="Inputter" th:text="${deposit.inputter}"></td>
+
+                <td data-label="Actions">
                     <div class="action-group" style="display: flex; gap: 5px;">
                         <button th:if="${deposit.canEdit}"
                                 class="btn btn-outline btn-sm"

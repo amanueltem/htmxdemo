@@ -117,6 +117,7 @@
 
 
     <build>
+        <finalName>htmxdemo</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

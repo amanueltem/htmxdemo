@@ -1,0 +1,23 @@
+# STAGE 1: Build using the official GraalVM 25 image
+FROM ghcr.io/graalvm/native-image-community:25 AS builder
+
+WORKDIR /build
+
+# Copy files and fix Windows line endings for 'mvnw'
+COPY .mvn/ .mvn
+COPY mvnw pom.xml ./
+RUN tr -d '\r' < mvnw > mvnw_unix && mv mvnw_unix mvnw && chmod +x mvnw
+
+# Download dependencies
+RUN ./mvnw dependency:go-offline
+
+# Compile to Native Binary
+COPY src ./src
+RUN ./mvnw -Pnative native:compile -DskipTests
+
+# STAGE 2: Minimal Runtime
+FROM gcr.io/distroless/base-debian12
+WORKDIR /app
+COPY --from=builder /build/target/htmxdemo /app/server
+EXPOSE 8080
+ENTRYPOINT ["/app/server"]

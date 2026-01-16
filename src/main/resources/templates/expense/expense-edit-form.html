@@ -17,7 +17,8 @@
                     <option th:each="ts : ${timeSpans}"
                             th:value="${ts}"
                             th:text="${ts}"
-                            th:selected="${expense.timeSpan != null and ts == expense.timeSpan.toString()}">
+                    /* REMOVE .toString() and .name() - Use direct comparison */
+                    th:selected="${ts == #strings.toString(expense.timeSpan)}">
                     </option>
                 </select>
             </div>

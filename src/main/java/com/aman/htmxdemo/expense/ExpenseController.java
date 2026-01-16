@@ -6,6 +6,7 @@ import com.aman.htmxdemo.user.User;
 import com.aman.htmxdemo.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -23,6 +24,7 @@ import java.util.stream.Stream;
 @Controller
 @RequestMapping("/expenses")
 @RequiredArgsConstructor
+@RegisterReflectionForBinding({ExpenseDisplay.class})
 public class ExpenseController {
 
     private final ExpenseRepository expenseRepository;
@@ -34,14 +36,14 @@ public class ExpenseController {
                                @RequestHeader(value = "HX-Request", required = false) boolean isHtmx,
                                @PageableDefault(size = 10) Pageable pageable) {
 
-        Page<Expense> expensePage = expenseRepository.findAll(pageable);
-        // Transform to record here too
-        Page<ExpenseDisplay> displayPage = expensePage.map(e -> mapToDisplay(e, currentUser));
-
-        model.addAttribute("expenses", displayPage);
+        // 1. Set the basic UI attributes
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("activeTab", "expenses");
 
+        // 2. Use the refreshTableFragment logic to populate the list and pagination variables
+        refreshTableFragment(model, currentUser, pageable);
+
+        // 3. Return the full page or just the fragment
         return isHtmx ? "expense/expense :: expense-table-container" : "expense/expense";
     }
 
@@ -254,14 +256,22 @@ public class ExpenseController {
         );
     }
 
-    // Update your refresh helper
     private String refreshTableFragment(Model model, User currentUser, Pageable pageable) {
         Page<Expense> expensePage = expenseRepository.findAll(pageable);
 
-        // Map to DTOs here so the HTML is logic-free
+        // 1. Map to your Reflection-Free Record
         Page<ExpenseDisplay> displayPage = expensePage.map(e -> mapToDisplay(e, currentUser));
 
+        // 2. The Nuclear Option: Flatten the Page object into simple variables
+        model.addAttribute("expenseList", displayPage.getContent());
+        model.addAttribute("currentPage", displayPage.getNumber());
+        model.addAttribute("totalPages", displayPage.getTotalPages());
+        model.addAttribute("hasNext", displayPage.hasNext());
+        model.addAttribute("hasPrev", displayPage.hasPrevious());
+
+        // Keep this for any other logic, but we won't call methods on it in HTML
         model.addAttribute("expenses", displayPage);
+
         return "expense/expense :: expense-table-container";
     }
 

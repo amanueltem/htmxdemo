@@ -151,7 +151,12 @@
                 <configuration>
                     <buildArgs>
                         <arg>--no-fallback</arg>
-                        <arg>-J-Xmx8g</arg>
+
+                        <arg>-J-Xmx4g</arg>
+
+                        <arg>-Ob</arg>
+
+                        <arg>--gc=serial</arg>
                     </buildArgs>
                 </configuration>
             </plugin>

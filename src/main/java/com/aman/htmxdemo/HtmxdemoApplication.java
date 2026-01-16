@@ -21,12 +21,25 @@ import java.util.Objects;
 @ImportRuntimeHints(MyProjectHints.class)
 public class HtmxdemoApplication {
 
-    public static void main(String[] args) {
-        Dotenv dotenv = Dotenv.load();
-        System.setProperty("HTMX_DB_URL", Objects.requireNonNull(dotenv.get("HTMX_DB_URL")));
-        System.setProperty("HTMX_DB_USERNAME", Objects.requireNonNull(dotenv.get("HTMX_DB_USERNAME")));
-        System.setProperty("HTMX_DB_PASSWORD", Objects.requireNonNull(dotenv.get("HTMX_DB_PASSWORD")));
+     static void main(String[] args) {
+        // 1. Configure Dotenv to be optional (Safe for Docker/Native builds)
+        Dotenv dotenv = Dotenv.configure()
+                .ignoreIfMissing()
+                .load();
+
+        // 2. Map variables only if they exist (Prefer System Env for Production)
+        setSystemPropertyIfNotNull(dotenv, "HTMX_DB_URL");
+        setSystemPropertyIfNotNull(dotenv, "HTMX_DB_USERNAME");
+        setSystemPropertyIfNotNull(dotenv, "HTMX_DB_PASSWORD");
+
         SpringApplication.run(HtmxdemoApplication.class, args);
+    }
+
+    private static void setSystemPropertyIfNotNull(Dotenv dotenv, String key) {
+        String value = dotenv.get(key);
+        if (value != null) {
+            System.setProperty(key, value);
+        }
     }
 
     @Bean

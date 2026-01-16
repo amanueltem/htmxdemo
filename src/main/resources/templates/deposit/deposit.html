@@ -21,89 +21,68 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="deposit : ${deposits.content}">
-                <td data-label="Date" th:text="${deposit.date}"></td>
-                <td data-label="Amount" th:text="${#numbers.formatDecimal(deposit.amount, 1, 2)}"></td>
-                <td data-label="Status">
+            <tr th:each="deposit : ${depositList}">
+                <td th:text="${deposit.date}"></td>
+                <td th:text="${deposit.amountFormatted}"></td>
+                <td>
                     <span class="status-badge"
-                          th:classappend="${deposit.entityStatus == 'AUTHORIZED' ? 'status-success' : 'status-warning'}"
-                          th:text="${deposit.entityStatus}">
+                          th:classappend="${deposit.status == 'AUTHORIZED' ? 'status-success' : 'status-warning'}"
+                          th:text="${deposit.status}">
                     </span>
                 </td>
-                <td data-label="Inputter" th:text="${deposit.inputter}"></td>
-                <td data-label="Actions">
-                    <div class="action-group">
-                        <button th:if="${deposit.entityStatus == 'UNAUTHORIZED' and (currentUser != null and deposit.inputter == currentUser.email)}"
-                                sec:authorize="hasRole('INPUTTER')"
+                <td th:text="${deposit.inputter}"></td>
+                <td>
+                    <div class="action-group" style="display: flex; gap: 5px;">
+                        <button th:if="${deposit.canEdit}"
                                 class="btn btn-outline btn-sm"
                                 th:hx-get="@{/deposits/edit/{id}(id=${deposit.id})}"
-                                hx-target="#modals-here">
-                            Edit
-                        </button>
+                                hx-target="#modals-here">Edit</button>
 
-                        <button th:if="${deposit.entityStatus == 'UNAUTHORIZED' and (currentUser != null and deposit.inputter == currentUser.email)}"
-                                sec:authorize="hasRole('INPUTTER')"
+                        <button th:if="${deposit.canDelete}"
                                 class="btn btn-danger btn-sm"
                                 th:hx-delete="@{/deposits/{id}(id=${deposit.id})}"
                                 hx-target="#main-content-wrapper"
                                 hx-swap="outerHTML"
-                                hx-confirm="Delete this deposit record?">
-                            Delete
-                        </button>
+                                hx-confirm="Delete?">Delete</button>
 
-                        <button th:if="${deposit.entityStatus == 'UNAUTHORIZED' and (currentUser != null and deposit.inputter != currentUser.email)}"
+                        <button th:if="${deposit.canAuthorize}"
                                 sec:authorize="hasRole('AUTHORIZER')"
                                 class="btn btn-primary btn-sm"
                                 th:hx-post="@{/deposits/{id}/authorize(id=${deposit.id})}"
                                 hx-target="#main-content-wrapper"
-                                hx-swap="outerHTML"
-                                hx-confirm="Authorize this deposit?">
-                            Authorize
-                        </button>
-                        <button th:if="${deposit.entityStatus == 'AUTHORIZED'
-        and (currentUser != null and deposit.inputter == currentUser.email)}"
-                                sec:authorize="hasRole('INPUTTER')"
+                                hx-swap="outerHTML">Authorize</button>
+
+                        <button th:if="${deposit.canRequestEdit}"
                                 class="btn btn-warning btn-sm"
                                 th:hx-get="@{/deposits/{id}/edit-request(id=${deposit.id})}"
-                                hx-target="#modals-here">
-                            Edit Request
-                        </button>
-                        <button th:if="${deposit.entityStatus == 'EDIT_REQUEST'
-        and currentUser != null
-        and deposit.authorizer == currentUser.email}"
-                                sec:authorize="hasRole('AUTHORIZER')"
+                                hx-target="#modals-here">Edit Request</button>
+
+                        <button th:if="${deposit.canAcceptEditRequest}"
                                 class="btn btn-success btn-sm"
                                 th:hx-post="@{/deposits/{id}/accept-edit-request(id=${deposit.id})}"
                                 hx-target="#main-content-wrapper"
-                                hx-swap="outerHTML"
-                                hx-confirm="Accept edit request and unlock this record?">
-                            Accept Edit Request
-                        </button>
+                                hx-swap="outerHTML">Accept Edit</button>
                     </div>
                 </td>
             </tr>
-            <tr th:if="${deposits == null or deposits.totalElements == 0}">
-                <td colspan="5" style="text-align: center; padding: 3rem; color: #64748b;">
-                    No records found.
-                </td>
+            <tr th:if="${totalElements == 0}">
+                <td colspan="5" style="text-align: center; padding: 2rem;">No records found.</td>
             </tr>
             </tbody>
         </table>
 
-        <div class="pagination-bar" th:if="${deposits != null and deposits.totalPages > 1}">
-            <button th:if="${deposits.hasPrevious()}"
+        <div class="pagination-bar" th:if="${totalPages > 1}">
+            <button th:if="${hasPrev}"
                     class="btn btn-outline btn-sm"
-                    th:hx-get="@{/deposits(page=${deposits.number - 1})}"
-                    hx-target="#main-content-wrapper"
-                    hx-swap="outerHTML">Previous</button>
+                    th:hx-get="@{/deposits(page=${currentPage - 1})}"
+                    hx-target="#main-content-wrapper" hx-swap="outerHTML">Previous</button>
 
-            <span class="page-info" th:text="'Page ' + (${deposits.number} + 1) + ' of ' + ${deposits.totalPages}"></span>
+            <span th:text="'Page ' + (${currentPage} + 1) + ' of ' + ${totalPages}"></span>
 
-            <button th:if="${deposits.hasNext()}"
+            <button th:if="${hasNext}"
                     class="btn btn-outline btn-sm"
-                    th:hx-get="@{/deposits(page=${deposits.number + 1})}"
-                    hx-target="#main-content-wrapper"
-                    hx-swap="outerHTML">Next</button>
+                    th:hx-get="@{/deposits(page=${currentPage + 1})}"
+                    hx-target="#main-content-wrapper" hx-swap="outerHTML">Next</button>
         </div>
     </div>
     <div id="modals-here"></div>

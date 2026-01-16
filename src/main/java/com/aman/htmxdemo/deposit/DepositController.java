@@ -2,10 +2,12 @@ package com.aman.htmxdemo.deposit;
 
 import com.aman.htmxdemo.common.EntityStatus;
 import com.aman.htmxdemo.expense.Expense;
+import com.aman.htmxdemo.expense.ExpenseDisplay;
 import com.aman.htmxdemo.handler.OperationNotPermittedException;
 import com.aman.htmxdemo.user.User;
 import com.aman.htmxdemo.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -22,6 +24,7 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/deposits")
 @RequiredArgsConstructor
+@RegisterReflectionForBinding({DepositDisplay.class})
 public class DepositController {
 
     private final DepositRepository depositRepository;
@@ -32,10 +35,12 @@ public class DepositController {
                                @AuthenticationPrincipal User currentUser,
                                @RequestHeader(value = "HX-Request", required = false) boolean isHtmx,
                                @PageableDefault(size = 10) Pageable pageable) {
-        Page<Deposit> depositPage = depositRepository.findAll(pageable);
-        model.addAttribute("deposits", depositPage);
+
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("activeTab", "deposits");
+
+        refreshTable(model, currentUser, pageable);
+
         return isHtmx ? "deposit/deposit :: deposit-table-container" : "deposit/deposit";
     }
 
@@ -190,9 +195,39 @@ public class DepositController {
 
     private String refreshTable(Model model, User user, Pageable pageable) {
         Page<Deposit> depositPage = depositRepository.findAll(pageable);
-        // Ensure deposits is never null to prevent SpEL errors
-        model.addAttribute("deposits", depositPage != null ? depositPage : Page.empty());
-        model.addAttribute("currentUser", user);
+
+        // Map to reflection-safe DTO
+        Page<DepositDisplay> displayPage = depositPage.map(d -> mapToDisplay(d, user));
+
+        // Nuclear Option: Flatten variables to avoid calling methods on PageImpl in HTML
+        model.addAttribute("depositList", displayPage.getContent());
+        model.addAttribute("currentPage", displayPage.getNumber());
+        model.addAttribute("totalPages", displayPage.getTotalPages());
+        model.addAttribute("totalElements", displayPage.getTotalElements());
+        model.addAttribute("hasNext", displayPage.hasNext());
+        model.addAttribute("hasPrev", displayPage.hasPrevious());
+
         return "deposit/deposit :: deposit-table-container";
+    }
+
+    private DepositDisplay mapToDisplay(Deposit d, User currentUser) {
+        String email = currentUser.getEmail();
+        boolean isInputter = d.getInputter().equals(email);
+        boolean isAuthorizerOfRecord = email.equals(d.getAuthorizer());
+        String status = d.getEntityStatus();
+
+        return new DepositDisplay(
+                d.getId(),
+                d.getDate().toString(),
+                String.format("%.2f", d.getAmount()),
+                status,
+                d.getInputter(),
+                d.getAuthorizer(),
+                "UNAUTHORIZED".equals(status) && isInputter, // canEdit
+                "UNAUTHORIZED".equals(status) && isInputter, // canDelete
+                "UNAUTHORIZED".equals(status) && !isInputter, // canAuthorize
+                "AUTHORIZED".equals(status) && isInputter,   // canRequestEdit
+                "EDIT_REQUEST".equals(status) && isAuthorizerOfRecord // canAccept
+        );
     }
 }

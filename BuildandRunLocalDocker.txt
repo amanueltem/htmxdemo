@@ -1,0 +1,14 @@
+# Build the image
+docker build -t htmxdemo-native .
+
+# Run it locally to verify (loads your .env variables into the container)
+docker run --env-file .env -p 8080:8080 htmxdemo-native
+
+
+#deploy to dockerhub
+docker login
+docker tag htmxdemo-native amanueltem/htmxdemo:latest
+docker push amanueltem/htmxdemo:latest
+
+#deploy to render
+docker.io/amanueltem/htmxdemo:latest

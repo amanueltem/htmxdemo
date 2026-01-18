@@ -3,7 +3,6 @@
   "appName": "htmxdemo",
   "webDir": "src/main/resources/static",
   "server": {
-    "url": "http://172.18.10.48:8080",
-    "cleartext": true
+    "url": "https://htmxdemo.onrender.com"
   }
 }

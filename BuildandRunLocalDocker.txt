@@ -12,3 +12,12 @@ docker push amanueltem/htmxdemo:latest
 
 #deploy to render
 docker.io/amanueltem/htmxdemo:latest
+
+
+
+#build the android
+./mvnw clean compile
+npx cap sync android
+cd android
+./gradlew assembleDebug
+### to build android application it needs java 21.

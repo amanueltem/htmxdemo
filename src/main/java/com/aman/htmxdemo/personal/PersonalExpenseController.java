@@ -111,7 +111,7 @@ public class PersonalExpenseController {
                         Sort.by(Sort.Direction.DESC, "date")
                 );
 
-        Page<PersonalExpense> expensePage = repo.findByInputter(currentUser.getEmail(),pageable);
+        Page<PersonalExpense> expensePage = repo.findByInputter(currentUser.getEmail(),sortedPageable);
 
 
 

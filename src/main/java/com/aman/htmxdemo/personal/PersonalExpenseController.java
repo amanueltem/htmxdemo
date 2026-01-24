@@ -45,7 +45,7 @@ public class PersonalExpenseController {
         refreshTableFragment(model, currentUser, pageable);
 
         // 3. Return the full page or just the fragment
-        return isHtmx ? "expense/expense :: expense-table-container" : "expense/expense";
+        return isHtmx ? "personal/expense :: expense-table-container" : "expense/expense";
     }
 
     @GetMapping("/new")
@@ -54,7 +54,7 @@ public class PersonalExpenseController {
         model.addAttribute("expense", new Expense());
         // Convert Enums to Strings here to avoid reflection in the template
         model.addAttribute("timeSpans", Stream.of(TimeSpan.values()).map(Enum::name).toList());
-        return "expense/expense-form :: expense-form";
+        return "personal/expense-form :: expense-form";
     }
 
     @PostMapping
@@ -65,7 +65,6 @@ public class PersonalExpenseController {
                                 @PageableDefault(size = 10) Pageable pageable) {
         expense.setInputter(currentUser.getEmail());
         repo.save(expense);
-
         return refreshTableFragment(model, currentUser, pageable);
     }
 
@@ -76,11 +75,10 @@ public class PersonalExpenseController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense not found"));
         model.addAttribute("expense", expense);
         model.addAttribute("timeSpans", Stream.of(TimeSpan.values()).map(Enum::name).toList());
-        return "expense/expense-edit-form :: expense-edit-form";
+        return "personal/expense-edit-form :: expense-edit-form";
     }
 
     @PostMapping("/{id}")
-    @PreAuthorize("hasRole('INPUTTER')")
     public String updateExpense(@PathVariable UUID id,
                                 @ModelAttribute Expense expenseDetails,
                                 @AuthenticationPrincipal User currentUser,
@@ -102,22 +100,7 @@ public class PersonalExpenseController {
 
 
 
-    @GetMapping("/{id}/edit-request")
-    @PreAuthorize("hasRole('INPUTTER')")
-    public String showEditRequestForm(@PathVariable UUID id,
-                                      @AuthenticationPrincipal User currentUser,
-                                      Model model) {
 
-        PersonalExpense expense = repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-        if (!expense.getInputter().equals(currentUser.getEmail())) {
-            throw new OperationNotPermittedException("This is not your record");
-        }
-
-        model.addAttribute("expense", expense);
-        return "expense/expense-edit-request :: expense-edit-request-form";
-    }
 
 
     private String refreshTableFragment(Model model, User currentUser, Pageable pageable) {
@@ -142,7 +125,7 @@ public class PersonalExpenseController {
         // Keep this for any other logic, but we won't call methods on it in HTML
         model.addAttribute("expenses", expensePage);
 
-        return "expense/expense :: expense-table-container";
+        return "personal/expense :: expense-table-container";
     }
 
     @DeleteMapping("/{id}")

@@ -154,6 +154,20 @@
     document.body.addEventListener('htmx:configRequest', (event) => {
         event.detail.headers['X-CSRF-TOKEN'] = /*[[${_csrf.token}]]*/ '';
     });
+    document.addEventListener('click', function (event) {
+    // Check if the clicked element is a nav-item
+    const clickedItem = event.target.closest('.nav-item');
+
+    if (clickedItem) {
+        // 1. Remove 'active' class from all nav-items
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // 2. Add 'active' class to the clicked item
+        clickedItem.classList.add('active');
+    }
+});
 </script>
 </body>
 </html>

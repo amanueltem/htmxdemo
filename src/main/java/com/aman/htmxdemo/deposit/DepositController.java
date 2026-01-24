@@ -9,7 +9,9 @@ import com.aman.htmxdemo.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -194,7 +196,14 @@ public class DepositController {
     }
 
     private String refreshTable(Model model, User user, Pageable pageable) {
-        Page<Deposit> depositPage = depositRepository.findAll(pageable);
+        Pageable sortedPageable =
+                PageRequest.of(
+                        pageable.getPageNumber(),
+                        pageable.getPageSize(),
+                        Sort.by(Sort.Direction.DESC, "date")
+                );
+
+        Page<Deposit> depositPage = depositRepository.findAll(sortedPageable);
 
         // Map to reflection-safe DTO
         Page<DepositDisplay> displayPage = depositPage.map(d -> mapToDisplay(d, user));

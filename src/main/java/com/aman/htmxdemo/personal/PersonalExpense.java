@@ -1,6 +1,5 @@
 package com.aman.htmxdemo.personal;
 
-import com.aman.htmxdemo.common.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -35,5 +34,10 @@ enum TimeSpan {
     DRINK,
     SHOWER,
     TAXI,
+    FAMILY_SUPPORT,
+    HAIRCUT,
+    SHOE_CLEANING,
+    BUY_CLOTHES,
+    BUY_SHOES,
     OTHER
 }

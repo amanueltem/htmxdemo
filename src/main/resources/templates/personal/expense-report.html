@@ -1,0 +1,38 @@
+<div th:fragment="personal-chart" id="personal-report-area">
+    <div class="dashboard-header">
+        <h3>Personal Spending Analysis</h3>
+        <input type="month" name="date" th:value="${report.selectedMonth()}"
+               hx-get="/personal-expenses/report" hx-target="#personal-report-area" class="month-picker">
+    </div>
+
+    <div class="main-balance-card personal-theme">
+        <span class="label">Total Personal Outflow</span>
+        <h1 th:text="${#numbers.formatDecimal(report.totalSpent(), 1, 2)} + ' ETB'">0.00 ETB</h1>
+    </div>
+
+    <div class="chart-container-box">
+        <canvas id="personalPieChart"></canvas>
+        <div th:if="${report.hasNoData()}" class="no-data">No spending recorded for this month.</div>
+    </div>
+
+    <script th:inline="javascript">
+        (function() {
+            const data = /*[[${report.categoryBreakdown()}]]*/ {};
+            const ctx = document.getElementById('personalPieChart');
+            if (ctx && Object.keys(data).length > 0) {
+                if (window.personalChart) window.personalChart.destroy();
+                window.personalChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(data),
+                        datasets: [{
+                            data: Object.values(data),
+                            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#64748b']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+        })();
+    </script>
+</div>

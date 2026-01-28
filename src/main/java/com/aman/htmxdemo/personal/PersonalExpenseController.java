@@ -19,7 +19,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Controller
@@ -147,4 +151,28 @@ public class PersonalExpenseController {
         return refreshTableFragment(model, currentUser, pageable);
     }
 
+    @GetMapping("/report")
+    public String getPersonalReport(@RequestParam(required = false) String date,
+                                    Model model,
+                                    @AuthenticationPrincipal User user) {
+
+        LocalDate start = (date != null) ? LocalDate.parse(date + "-01") : LocalDate.now().withDayOfMonth(1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+        List<Object[]> rawData = repo.getCategorySumsRaw(user.getEmail(), start, end);
+
+        Map<String, Double> categories = rawData.stream()
+                .collect(Collectors.toMap(row -> row[0].toString(), row -> (Double) row[1]));
+
+        Double total = categories.values().stream().mapToDouble(Double::doubleValue).sum();
+
+        model.addAttribute("report", new PersonalReport(
+                total,
+                categories,
+                start.toString().substring(0, 7),
+                categories.isEmpty()
+        ));
+
+        return "personal/expense-report:: personal-chart";
+    }
 }

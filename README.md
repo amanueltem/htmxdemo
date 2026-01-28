@@ -47,17 +47,17 @@ Instead of React, Angular, or Vue, the UI is powered by **HTMX + server-rendered
 * **Maker–Checker Workflow**
   High-integrity transaction processing:
 
-  * One user *inputs* a transaction
-  * Another user *authorizes* or *rejects* it
+    * One user *inputs* a transaction
+    * Another user *authorizes* or *rejects* it
 
 * **Rolling Balance Logic**
   Automatically computes carry-over balances using *all historical authorized transactions*.
 
 * **Edit Request System**
 
-  * Authorized records are immutable
-  * Changes require a formal edit request
-  * Edit requests follow the same approval workflow
+    * Authorized records are immutable
+    * Changes require a formal edit request
+    * Edit requests follow the same approval workflow
 
 This mirrors real-world **banking and core-finance systems**.
 
@@ -77,30 +77,38 @@ This mirrors real-world **banking and core-finance systems**.
 * **Java 25 & Spring Boot 4.0.1**
   Leveraging the latest JVM optimizations and language features
 
-* **GraalVM Native Image**
-  Ahead-of-Time (AOT) compilation into a native Windows `.exe`:
+    * **Virtual Threads enabled by default** (Project Loom)
+    * Each HTTP request runs on a lightweight virtual thread, not a heavyweight OS thread
+    * Enables massive concurrency with minimal memory usage
+    * Ideal for IO-heavy financial workflows (DB calls, authorization checks, audit logging)
+    * Delivers high throughput without complex reactive programming
 
-  * Millisecond startup time
-  * Extremely low memory footprint
+* **GraalVM Native Image**
+  Ahead-of-Time (AOT) compilation into a native binary:
+
+    * OS-independent in principle (can be built on any OS with GraalVM JDK + a compatible C compiler)
+    * Produces platform-specific binaries (Linux, Windows, macOS)
+    * Millisecond startup time
+    * Extremely low memory footprint
 
 * **Reflection-Free Architecture**
 
-  * Java Records for DTOs
-  * `@RegisterReflectionForBinding` for GraalVM compatibility
-  * Minimal runtime reflection
+    * Java Records for DTOs
+    * `@RegisterReflectionForBinding` for GraalVM compatibility
+    * Minimal runtime reflection
 
 ---
 
 ## 🛠 Tech Stack
 
-| Layer    | Technology                            |
-| -------- | ------------------------------------- |
-| Language | Java 25 (OpenJDK / GraalVM)           |
-| Backend  | Spring Boot 4.0.1                     |
+| Layer    | Technology                             |
+| -------- | -------------------------------------- |
+| Language | Java 25 (OpenJDK / GraalVM)            |
+| Backend  | Spring Boot 4.0.1                      |
 | Frontend | HTMX, Thymeleaf, Tailwind-inspired CSS |
-| Database | PostgreSQL   |
-| Charts   | Chart.js                              |
-| Security | Spring Security (Role-based access)   |
+| Database | PostgreSQL / H2 (JPA + Hibernate)      |
+| Charts   | Chart.js                               |
+| Security | Spring Security (Role-based access)    |
 
 ---
 
@@ -122,17 +130,24 @@ This mirrors real-world **banking and core-finance systems**.
 
 * **Maven 3.9+**
 
-* **Windows (Native Build only)**
-  Visual Studio 2022 with **Desktop Development with C++** installed
+* **Native Image Build Toolchain (OS-specific)**
+  Required only if you want to compile a native binary:
+
+    * **Linux**: `gcc` / `clang` + `glibc`
+    * **macOS**: Xcode Command Line Tools
+    * **Windows**: Visual Studio 2022 with **Desktop Development with C++** installed
 
 ---
 
 ### Installation
 
+````bash
 ```bash
 git clone git@github.com:amanueltem/htmxdemo.git
 cd htmxdemo
-```
+````
+
+````
 
 ---
 
@@ -140,13 +155,15 @@ cd htmxdemo
 
 ```powershell
 ./mvnw spring-boot:run
-```
+````
 
 Application will start using the JVM with hot reload enabled.
 
 ---
 
-### Compiling to Native Image (Windows)
+### Compiling to Native Image (Any OS)
+
+FinanceManager-HTMX can be compiled into a native binary on **any supported OS** (Linux, Windows, macOS), as long as GraalVM JDK and a compatible C compiler are available.
 
 To generate a standalone executable that starts in milliseconds:
 
@@ -214,6 +231,8 @@ All implemented with **boring, proven Java tech**.
 ---
 
 ## 📜 License
+
+MIT License
 
 ---
 

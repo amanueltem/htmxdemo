@@ -11,12 +11,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 @SpringBootApplication
 @EnableJpaAuditing
 @ImportRuntimeHints(MyProjectHints.class)
+@EnableAsync
 public class HtmxdemoApplication {
 
      static void main(String[] args) {
@@ -29,6 +31,7 @@ public class HtmxdemoApplication {
         setSystemPropertyIfNotNull(dotenv, "HTMX_DB_URL");
         setSystemPropertyIfNotNull(dotenv, "HTMX_DB_USERNAME");
         setSystemPropertyIfNotNull(dotenv, "HTMX_DB_PASSWORD");
+         setSystemPropertyIfNotNull(dotenv, "GMAIL_APP_PASSWORD");
 
         SpringApplication.run(HtmxdemoApplication.class, args);
     }

@@ -20,14 +20,14 @@ public class SecurityConfig {
         http
                 // Authorize requests
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login","/register").permitAll()
+                        .requestMatchers("/login","/register","/forgot-password/**").permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .anyRequest().authenticated()
                 )
 
                 // Form login configuration
                 .formLogin(form -> form
-                        .loginPage("/login")          // 👈 MUST match controller
+                        .loginPage("/login")
                         .loginProcessingUrl("/login") // POST handled by Spring Security
                         .failureUrl("/login?error")
                         .defaultSuccessUrl("/", true)

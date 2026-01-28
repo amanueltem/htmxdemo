@@ -8,30 +8,43 @@ spring:
     username: ${HTMX_DB_USERNAME}
     password: ${HTMX_DB_PASSWORD}
     hikari:
-      maximum-pool-size: 4  # Keep this low for Free Tier RAM (Neon & Render)
+      maximum-pool-size: 4  # Keep low for Free Tier RAM
       minimum-idle: 1
 
+  # Mail Configuration (Moved here for proper Auto-Configuration)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: amanueltemesgen360@gmail.com
+    password: ${GMAIL_APP_PASSWORD} # Use your .env file via java-dotenv
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
   jpa:
-    open-in-view: false      # Saves memory by closing DB connections faster
-    show-sql: false          # Stop printing SQL to console
+    open-in-view: false      # Performance: closes connections faster
+    show-sql: false
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
-        format_sql: false    # No CPU wasted formatting strings
+        format_sql: false
         highlight_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-  # Disable the Spring Banner (Saves a few KB of startup memory)
   main:
     banner-mode: "off"
 
-# Logging Strategy: Only show what matters
+# Logging Strategy
 logging:
   pattern:
-    console: "%d{HH:mm:ss} %-5level %logger{15} : %m%n" # Shorten logs to save IO
+    console: "%d{HH:mm:ss} %-5level %logger{15} : %m%n"
   level:
-    root: WARN               # Only show warnings/errors by default
-    com.aman: INFO           # Allow your own app logic to log at INFO
+    root: WARN
+    com.aman: INFO
     org.springframework: WARN
-    org.hibernate.SQL: ERROR # Explicitly kill Hibernate logs
+    org.hibernate.SQL: ERROR

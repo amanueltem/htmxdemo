@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" th:href="@{/css/app.css}" />
+    <script src="https://unpkg.com/htmx.org@2.0.1"></script>
 </head>
 <body>
 
 <div id="toast-container">
-
     <th:block th:if="${param.error != null}">
         <div th:replace="~{fragments/toast :: toast('Invalid email or password. Please try again.', 'error')}"></div>
     </th:block>
@@ -21,11 +21,10 @@
     <th:block th:if="${param.success != null and param.error == null and param.logout == null}">
         <div th:replace="~{fragments/toast :: toast('Account created! Please login.', 'success')}"></div>
     </th:block>
-
 </div>
 
 <div class="container">
-    <div class="card stack">
+    <div class="card stack" id="auth-card">
 
         <div class="text-center">
             <h2>Welcome Back</h2>
@@ -33,7 +32,6 @@
         </div>
 
         <form th:action="@{/login}" method="post" class="stack">
-
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
             <div class="form-group">
@@ -50,7 +48,11 @@
         </form>
 
         <div class="text-center mt-2">
-            <a th:href="@{/register}" class="btn-link">Don't have an account? Create one</a>
+            <button type="button"
+                    class="btn-link"
+                    hx-get="/forgot-password/show"
+                    hx-target="#auth-card"
+                    hx-swap="innerHTML">Forgot password?</button>
         </div>
 
     </div>

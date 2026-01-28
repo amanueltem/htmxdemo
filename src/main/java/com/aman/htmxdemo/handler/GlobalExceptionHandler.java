@@ -1,32 +1,42 @@
 package com.aman.htmxdemo.handler;
+
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({DataIntegrityViolationException.class, RuntimeException.class})
-    public String handleRuntimeErrors(Exception ex,
-                                      Model model,
-                                      HttpServletRequest request,
-                                      HttpServletResponse response) {
+    @ExceptionHandler(Exception.class)
+    public String handleAllExceptions(Exception ex, Model model, HttpServletRequest request) {
+        //System.out.println(ex.getMessage());
 
-        String message = "Something went wrong.";
-        if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("email")) {
-            message = "You already Registered.";
-        }
+        // Use Java 25 Pattern Matching for switch to keep it clean
+        String message = switch (ex) {
+            case OperationNotPermittedException e -> e.getMessage();
+
+            case EntityNotFoundException e -> e.getMessage();
+
+            case DataIntegrityViolationException e -> "You are already registered.";
+
+            default -> {
+                // Return generic message to the user (Security)
+                yield "Something went wrong for security reasons.";
+            }
+        };
 
         model.addAttribute("toastMessage", message);
         model.addAttribute("toastType", "error");
 
+        // HTMX Logic: Return only the toast fragment if it's an HTMX request
         if (request.getHeader("HX-Request") != null) {
-            // Explicitly passing parameters to the fragment in the return string
             return "fragments/toast :: toast(message=${toastMessage}, type=${toastType})";
         }
 
-        return "auth/register";
+        // Fallback for non-HTMX requests (e.g., initial page load errors)
+        return "auth/login";
     }
 }

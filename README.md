@@ -93,14 +93,14 @@ This mirrors real-world **banking and core-finance systems**.
 
 ## 🛠 Tech Stack
 
-| Layer    | Technology                             |
-| -------- | -------------------------------------- |
-| Language | Java 25 (OpenJDK / GraalVM)            |
-| Backend  | Spring Boot 4.0.1                      |
+| Layer    | Technology                            |
+| -------- | ------------------------------------- |
+| Language | Java 25 (OpenJDK / GraalVM)           |
+| Backend  | Spring Boot 4.0.1                     |
 | Frontend | HTMX, Thymeleaf, Tailwind-inspired CSS |
-| Database | PostgreSQL / H2 (JPA + Hibernate)      |
-| Charts   | Chart.js                               |
-| Security | Spring Security (Role-based access)    |
+| Database | PostgreSQL   |
+| Charts   | Chart.js                              |
+| Security | Spring Security (Role-based access)   |
 
 ---
 
@@ -131,7 +131,7 @@ This mirrors real-world **banking and core-finance systems**.
 
 ```bash
 git clone git@github.com:amanueltem/htmxdemo.git
-cd FinanceManager-HTMX
+cd htmxdemo
 ```
 
 ---
@@ -214,8 +214,6 @@ All implemented with **boring, proven Java tech**.
 ---
 
 ## 📜 License
-
-MIT License
 
 ---
 

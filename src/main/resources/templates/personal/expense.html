@@ -47,13 +47,13 @@
 
         <div class="pagination-bar" th:if="${totalPages > 1}">
             <button th:if="${hasPrev}" class="btn btn-outline btn-sm"
-                    th:hx-get="@{/expenses(page=${currentPage - 1})}"
+                    th:hx-get="@{/personal-expenses(page=${currentPage - 1})}"
                     hx-target="#main-content-wrapper" hx-swap="outerHTML">Previous</button>
 
             <span th:text="'Page ' + (${currentPage} + 1) + ' of ' + ${totalPages}"></span>
 
             <button th:if="${hasNext}" class="btn btn-outline btn-sm"
-                    th:hx-get="@{/expenses(page=${currentPage + 1})}"
+                    th:hx-get="@{/personal-expenses(page=${currentPage + 1})}"
                     hx-target="#main-content-wrapper" hx-swap="outerHTML">Next</button>
         </div>
     </div>

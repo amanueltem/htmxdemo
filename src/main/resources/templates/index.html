@@ -58,8 +58,12 @@
                     </button>
                 </li>
                 <li>
-                    <button class="nav-item" hx-get="/personal-expenses/report" hx-target="#main-content">
-                        📊 Personal Analytics
+                    <button class="nav-item"
+                            hx-get="/personal-expenses/report"
+                            hx-target="#main-content"
+                            hx-push-url="true"
+                            hx-indicator="#loading-bar"
+                            onclick="closeMenuOnSelect()"> 📊 Personal Analytics
                     </button>
                 </li>
             </ul>

@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 @Controller
 @RequestMapping("/personal-expenses")
 @RequiredArgsConstructor
-@RegisterReflectionForBinding({ExpenseDisplay.class})
+@RegisterReflectionForBinding({ExpenseDisplay.class,PersonalReport.class})
 public class PersonalExpenseController {
 
     private final PersonalExpenseRepository repo;

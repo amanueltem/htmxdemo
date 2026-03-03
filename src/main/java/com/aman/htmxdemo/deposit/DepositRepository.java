@@ -14,8 +14,7 @@ public interface DepositRepository extends JpaRepository<Deposit, UUID> {
     // 1. CUMULATIVE: All confirmed deposits from history before this month
     @Query("""
         SELECT COALESCE(SUM(d.amount), 0.0) FROM Deposit d 
-        JOIN User u ON d.inputter = u.email 
-        WHERE u.groupMember.id = :groupId 
+        WHERE d.group.id = :groupId 
         AND d.date < :startDate 
         AND d.entityStatus = 'AUTHORIZED'
     """)
@@ -24,8 +23,7 @@ public interface DepositRepository extends JpaRepository<Deposit, UUID> {
     // 2. PERIOD: Confirmed deposits for this month only
     @Query("""
         SELECT COALESCE(SUM(d.amount), 0.0) FROM Deposit d 
-        JOIN User u ON d.inputter = u.email 
-        WHERE u.groupMember.id = :groupId 
+        WHERE d.group.id = :groupId 
         AND d.date >= :startDate AND d.date <= :endDate 
         AND d.entityStatus = 'AUTHORIZED'
     """)

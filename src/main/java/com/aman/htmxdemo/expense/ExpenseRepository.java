@@ -17,8 +17,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
     // 1. CUMULATIVE: Sum every AUTHORIZED expense ever made BEFORE this month
     @Query("""
         SELECT COALESCE(SUM(e.amount), 0.0) FROM Expense e 
-        JOIN User u ON e.inputter = u.email 
-        WHERE u.groupMember.id = :groupId 
+        WHERE e.group.id = :groupId 
         AND e.date < :startDate 
         AND e.entityStatus = 'AUTHORIZED'
     """)
@@ -27,8 +26,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
     // 2. PERIOD: Sum strictly AUTHORIZED expenses for this month
     @Query("""
         SELECT COALESCE(SUM(e.amount), 0.0) FROM Expense e 
-        JOIN User u ON e.inputter = u.email 
-        WHERE u.groupMember.id = :groupId 
+        WHERE e.group.id = :groupId 
         AND e.date >= :startDate AND e.date <= :endDate 
         AND e.entityStatus = 'AUTHORIZED'
     """)
@@ -39,8 +37,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
     // 3. PIE CHART: Authorized only
     @Query("""
         SELECT e.timeSpan, SUM(e.amount) FROM Expense e 
-        JOIN User u ON e.inputter = u.email 
-        WHERE u.groupMember.id = :groupId 
+        WHERE e.group.id = :groupId 
         AND e.date >= :startDate AND e.date <= :endDate 
         AND e.entityStatus = 'AUTHORIZED'
         GROUP BY e.timeSpan

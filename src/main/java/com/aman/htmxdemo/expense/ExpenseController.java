@@ -32,6 +32,7 @@ public class ExpenseController {
     private final ExpenseRepository expenseRepository;
     private final UserRepository userRepository;
 
+
     @GetMapping
     public String listExpenses(Model model,
                                @AuthenticationPrincipal User currentUser,
@@ -67,6 +68,7 @@ public class ExpenseController {
 
         expense.setEntityStatus(EntityStatus.UNAUTHORIZED.name());
         expense.setInputter(currentUser.getEmail());
+        expense.setGroup(currentUser.getGroupMember());
         expenseRepository.save(expense);
 
         return refreshTableFragment(model, currentUser, pageable);
@@ -266,7 +268,7 @@ public class ExpenseController {
                         Sort.by(Sort.Direction.DESC, "date")
                 );
 
-        Page<Expense> expensePage = expenseRepository.findAll(sortedPageable);
+        Page<Expense> expensePage = expenseRepository.findAllByGroupId(currentUser.getGroupMember().getId(),sortedPageable);
 
         // 1. Map to your Reflection-Free Record
         Page<ExpenseDisplay> displayPage = expensePage.map(e -> mapToDisplay(e, currentUser));

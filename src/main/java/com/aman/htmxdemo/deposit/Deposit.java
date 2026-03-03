@@ -1,6 +1,7 @@
 package com.aman.htmxdemo.deposit;
 
 import com.aman.htmxdemo.common.BaseEntity;
+import com.aman.htmxdemo.group.GroupMember;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -21,4 +22,7 @@ public class Deposit  extends BaseEntity {
     private UUID id;
     private LocalDate date;
     private Double amount;
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private GroupMember group;
 }

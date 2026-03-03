@@ -2,6 +2,8 @@ package com.aman.htmxdemo.group;
 
 import java.util.List;
 
+import com.aman.htmxdemo.deposit.Deposit;
+import com.aman.htmxdemo.expense.Expense;
 import jakarta.persistence.*;
 import com.aman.htmxdemo.user.User;
 
@@ -25,4 +27,8 @@ public class GroupMember {
 	private String name;
     @OneToMany(mappedBy = "groupMember", orphanRemoval = true,fetch = FetchType.LAZY)
     private List<User> members;
+    @OneToMany(mappedBy = "group", orphanRemoval = true,fetch = FetchType.LAZY)
+    private List<Expense> expenses;
+    @OneToMany(mappedBy = "group", orphanRemoval = true,fetch = FetchType.LAZY)
+    private List<Deposit> deposits;
 }

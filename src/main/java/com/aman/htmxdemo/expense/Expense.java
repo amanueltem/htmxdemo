@@ -1,10 +1,8 @@
 package com.aman.htmxdemo.expense;
 
 import com.aman.htmxdemo.common.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.aman.htmxdemo.group.GroupMember;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -25,6 +23,9 @@ public class Expense extends BaseEntity {
     private LocalDate date;
     private Double amount;
     private String timeSpan;
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private GroupMember group;
 }
 
 enum TimeSpan {

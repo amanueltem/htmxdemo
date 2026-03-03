@@ -19,12 +19,12 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
 
         // Update this URL based on your production domain
-        String resetUrl = "http://localhost:8080/forgot-password/reset?token=" + token;
+        String resetUrl = "https://htmxdemo.onrender.com/forgot-password/reset?token=" + token;
 
         String htmlContent = String.format("""
             <h3>Password Reset Request</h3>
             <p>You requested a password reset for FinanceManager-HTMX.</p>
-            <p>Click the link below to reset your password. This link expires in 5 minutes.</p>
+            <p>Click the link below to reset your password. This link expires in 10 minutes.</p>
             <a href="%s">Reset Password</a>
             """, resetUrl);
 

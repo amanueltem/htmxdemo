@@ -1,5 +1,8 @@
 package com.aman.htmxdemo.expense;
 
+import com.aman.htmxdemo.group.GroupMember;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -54,4 +57,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
                         (v1, v2) -> v1
                 ));
     }
+
+
+    Page<Expense> findAllByGroupId(Long groupId, Pageable pageable);
 }

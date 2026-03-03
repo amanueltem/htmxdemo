@@ -60,6 +60,7 @@ public class DepositController {
                                 Model model, @PageableDefault(size = 10) Pageable pageable) {
         deposit.setEntityStatus(EntityStatus.UNAUTHORIZED.name());
         deposit.setInputter(currentUser.getEmail());
+        deposit.setGroup(currentUser.getGroupMember());
         depositRepository.save(deposit);
         return refreshTable(model, currentUser, pageable);
     }
@@ -203,7 +204,7 @@ public class DepositController {
                         Sort.by(Sort.Direction.DESC, "date")
                 );
 
-        Page<Deposit> depositPage = depositRepository.findAll(sortedPageable);
+        Page<Deposit> depositPage = depositRepository.findAllByGroupId(user.getGroupMember().getId(),sortedPageable);
 
         // Map to reflection-safe DTO
         Page<DepositDisplay> displayPage = depositPage.map(d -> mapToDisplay(d, user));

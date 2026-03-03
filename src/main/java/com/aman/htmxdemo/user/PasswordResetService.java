@@ -34,7 +34,7 @@ public class PasswordResetService {
                 .token(tokenValue)
                 .user(user)
                 .createdAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plusMinutes(5))
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
                 .build();
 
         tokenRepository.save(token);
